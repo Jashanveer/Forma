@@ -20,8 +20,10 @@ struct AccountabilityDashboard: Decodable {
     let match: MentorMatch?
     let menteeDashboard: MenteeDashboard
     let mentorDashboard: MentorDashboard
+    let mentorship: MentorshipStatus?
     let rewards: Rewards
     let weeklyChallenge: WeeklyChallenge
+    let social: SocialDashboard?
     let feed: [SocialPost]
     let notifications: [Notification]
 
@@ -73,6 +75,15 @@ struct AccountabilityDashboard: Decodable {
         let mentees: [MenteeSummary]
     }
 
+    struct MentorshipStatus: Decodable {
+        let canFindMentor: Bool
+        let hasMentor: Bool
+        let canChangeMentor: Bool
+        let lockedUntil: String?
+        let lockDaysRemaining: Int
+        let message: String
+    }
+
     struct MenteeSummary: Decodable, Identifiable {
         var id: Int64 { matchId }
 
@@ -112,6 +123,33 @@ struct AccountabilityDashboard: Decodable {
         let author: String
         let message: String
         let createdAt: String
+    }
+
+    struct SocialDashboard: Decodable {
+        let friendCount: Int
+        let updates: [SocialActivity]
+        let suggestions: [FriendSummary]
+    }
+
+    struct SocialActivity: Decodable, Identifiable {
+        let id: String
+        let userId: Int64
+        let displayName: String
+        let message: String
+        let weeklyConsistencyPercent: Int
+        let progressPercent: Int
+        let kind: String
+        let createdAt: String?
+    }
+
+    struct FriendSummary: Decodable, Identifiable {
+        var id: Int64 { userId }
+
+        let userId: Int64
+        let displayName: String
+        let weeklyConsistencyPercent: Int
+        let progressPercent: Int
+        let goals: String
     }
 
     struct Message: Decodable, Identifiable {
@@ -160,27 +198,43 @@ final class HabitBackendStore: ObservableObject {
     }
 
     func signOut() {
-        token = nil
-        dashboard = nil
-        statusMessage = nil
-        errorMessage = nil
-        UserDefaults.standard.removeObject(forKey: tokenKey)
+        clearSession()
     }
 
     func listHabits() async throws -> [BackendHabit] {
-        try await client.listHabits(token: requireToken())
+        do {
+            return try await client.listHabits(token: requireToken())
+        } catch {
+            handleAuthenticatedRequestError(error)
+            throw error
+        }
     }
 
     func createHabit(title: String) async throws -> BackendHabit {
-        try await client.createHabit(title: title, token: requireToken())
+        do {
+            return try await client.createHabit(title: title, token: requireToken())
+        } catch {
+            handleAuthenticatedRequestError(error)
+            throw error
+        }
     }
 
     func setCheck(habitID: Int64, dateKey: String, done: Bool) async throws {
-        _ = try await client.setCheck(habitID: habitID, dateKey: dateKey, done: done, token: requireToken())
+        do {
+            _ = try await client.setCheck(habitID: habitID, dateKey: dateKey, done: done, token: requireToken())
+        } catch {
+            handleAuthenticatedRequestError(error)
+            throw error
+        }
     }
 
     func deleteHabit(habitID: Int64) async throws {
-        try await client.deleteHabit(habitID: habitID, token: requireToken())
+        do {
+            try await client.deleteHabit(habitID: habitID, token: requireToken())
+        } catch {
+            handleAuthenticatedRequestError(error)
+            throw error
+        }
     }
 
     func refreshDashboard() async {
@@ -189,7 +243,7 @@ final class HabitBackendStore: ObservableObject {
         do {
             dashboard = try await client.dashboard(token: token)
         } catch {
-            errorMessage = error.localizedDescription
+            handleAuthenticatedRequestError(error)
         }
     }
 
@@ -204,7 +258,22 @@ final class HabitBackendStore: ObservableObject {
             statusMessage = "Mentor match updated"
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription
+            handleAuthenticatedRequestError(error)
+        }
+    }
+
+    func requestFriend(userID: Int64) async {
+        guard let token else { return }
+
+        isSyncing = true
+        defer { isSyncing = false }
+
+        do {
+            dashboard = try await client.requestFriend(friendUserID: userID, token: token)
+            statusMessage = "Friend added"
+            errorMessage = nil
+        } catch {
+            handleAuthenticatedRequestError(error)
         }
     }
 
@@ -240,6 +309,23 @@ final class HabitBackendStore: ObservableObject {
             throw HabitBackendError.notAuthenticated
         }
         return token
+    }
+
+    private func handleAuthenticatedRequestError(_ error: Error) {
+        if case HabitBackendError.notAuthenticated = error {
+            clearSession(errorMessage: error.localizedDescription)
+            return
+        }
+
+        errorMessage = error.localizedDescription
+    }
+
+    private func clearSession(errorMessage: String? = nil) {
+        token = nil
+        dashboard = nil
+        statusMessage = nil
+        self.errorMessage = errorMessage
+        UserDefaults.standard.removeObject(forKey: tokenKey)
     }
 }
 
@@ -304,6 +390,10 @@ private struct HabitBackendClient {
         try await request(path: "/api/accountability/match", method: "POST", token: token)
     }
 
+    func requestFriend(friendUserID: Int64, token: String) async throws -> AccountabilityDashboard {
+        try await request(path: "/api/accountability/friends/\(friendUserID)", method: "POST", token: token)
+    }
+
     private func request<Response: Decodable>(
         path: String,
         method: String,
@@ -349,6 +439,10 @@ private struct HabitBackendClient {
             }
 
             guard (200..<300).contains(httpResponse.statusCode) else {
+                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                    throw HabitBackendError.notAuthenticated
+                }
+
                 let message = (try? decoder.decode(ApiErrorResponse.self, from: data).message)
                     ?? HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
                 throw HabitBackendError.server(message)
@@ -400,7 +494,7 @@ private enum HabitBackendError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAuthenticated:
-            return "Sign in to sync with the backend."
+            return "Session expired. Sign in again to sync with the backend."
         case .invalidResponse:
             return "The backend returned an invalid response."
         case .server(let message):

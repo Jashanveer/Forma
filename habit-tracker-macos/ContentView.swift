@@ -205,7 +205,7 @@ struct ContentView: View {
                         metrics: metrics,
                         backend: backend,
                         onSync: syncWithBackend,
-                        onAssignMentor: assignMentor
+                        onFindMentor: assignMentor
                     )
                         .frame(width: 330)
                         .padding(.leading, 22)
@@ -241,8 +241,8 @@ struct ContentView: View {
         .overlay(alignment: .leading) {
             if !settingsOpen {
                 EdgePanelHandle(
-                    systemImage: "person.2",
-                    label: "Mentor",
+                    systemImage: "person.2.fill",
+                    label: "Social",
                     edge: .leading,
                     isActive: settingsOpen,
                     dragDirection: .horizontal
@@ -424,12 +424,6 @@ struct ContentView: View {
         }
     }
 
-    private func assignMentor() {
-        Task {
-            await backend.assignMentor()
-        }
-    }
-
     private func toggleHabit(_ habit: Habit) {
         var keys = habit.completedDayKeys
         let wasUnchecked = !keys.contains(todayKey)
@@ -499,6 +493,12 @@ struct ContentView: View {
                     backend.errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+
+    private func assignMentor() {
+        Task {
+            await backend.assignMentor()
         }
     }
 }
@@ -808,7 +808,7 @@ private struct SettingsPanel: View {
     let metrics: HabitMetrics
     @ObservedObject var backend: HabitBackendStore
     let onSync: () -> Void
-    let onAssignMentor: () -> Void
+    let onFindMentor: () -> Void
 
     var body: some View {
         ScrollView {
@@ -821,9 +821,9 @@ private struct SettingsPanel: View {
                         .cleanShotSurface(shape: RoundedRectangle(cornerRadius: 8, style: .continuous), level: .control)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Accountability Hub")
+                        Text("Social Circle")
                             .font(.headline)
-                        Text("Support first, streaks second")
+                        Text("Friends, consistency, small wins")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -833,17 +833,17 @@ private struct SettingsPanel: View {
 
                 BackendConnectionCard(backend: backend, onSync: onSync)
 
-                LevelStatusCard(metrics: metrics, dashboard: backend.dashboard)
+                MentorActionCard(metrics: metrics, dashboard: backend.dashboard, onFindMentor: onFindMentor)
 
-                MentorMatchCard(metrics: metrics, dashboard: backend.dashboard, onAssignMentor: onAssignMentor)
-
-                MenteeDashboardCard(metrics: metrics, dashboard: backend.dashboard)
-
-                MentorDashboardCard(metrics: metrics, dashboard: backend.dashboard)
+                SocialSummaryCard(metrics: metrics, dashboard: backend.dashboard)
 
                 SocialFeedCard(posts: metrics.feedPosts, dashboard: backend.dashboard)
 
-                RetentionPromptCard(metrics: metrics, dashboard: backend.dashboard)
+                FriendSuggestionsCard(dashboard: backend.dashboard) { userID in
+                    Task {
+                        await backend.requestFriend(userID: userID)
+                    }
+                }
             }
             .padding(16)
         }
@@ -896,93 +896,64 @@ private struct BackendConnectionCard: View {
     }
 }
 
-private struct LevelStatusCard: View {
+private struct MentorActionCard: View {
     let metrics: HabitMetrics
     let dashboard: AccountabilityDashboard?
+    let onFindMentor: () -> Void
 
-    private var levelName: String {
-        dashboard?.level.name ?? metrics.level.rawValue
+    private var status: AccountabilityDashboard.MentorshipStatus? {
+        dashboard?.mentorship
     }
 
-    private var level: UserLevel {
-        UserLevel(rawValue: levelName) ?? metrics.level
+    private var mentorName: String? {
+        dashboard?.match?.mentor.displayName
     }
 
-    private var consistencyPercent: Int {
-        dashboard?.level.weeklyConsistencyPercent ?? metrics.weeklyConsistencyPercent
+    private var canFindMentor: Bool {
+        status?.canFindMentor ?? (metrics.totalHabits > 0 && metrics.daysUntilMentor == 0)
     }
 
-    private var note: String {
-        dashboard?.level.note ?? metrics.levelNote
+    private var canChangeMentor: Bool {
+        status?.canChangeMentor ?? false
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label(levelName, systemImage: level.systemImage)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(level.tint)
-                Spacer()
-                Text("\(consistencyPercent)%")
-                    .font(.caption.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-
-            ProgressView(value: metrics.nextLevelProgress)
-                .tint(level.tint)
-
-            Text(note)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+    private var message: String {
+        if let message = status?.message {
+            return message
         }
-        .padding(12)
-        .cleanShotSurface(
-            shape: RoundedRectangle(cornerRadius: 14, style: .continuous),
-            level: .control
-        )
+
+        if canFindMentor {
+            return "Find a mentor when you want extra accountability."
+        }
+
+        return "Mentor matching unlocks after 7 days of habit data."
     }
-}
-
-private struct MentorMatchCard: View {
-    let metrics: HabitMetrics
-    let dashboard: AccountabilityDashboard?
-    let onAssignMentor: () -> Void
-
-    private var mentor: MentorCandidate { metrics.mentorCandidate }
-    private var matchedMentor: AccountabilityDashboard.UserSummary? { dashboard?.match?.mentor }
-    private var needsMentor: Bool { dashboard?.level.needsMentor ?? metrics.needsMentor }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PanelTitle(systemImage: "point.3.connected.trianglepath.dotted", title: "Mentor matching")
+            PanelTitle(systemImage: "person.crop.circle.badge.checkmark", title: "Mentor")
 
             HStack(alignment: .top, spacing: 10) {
-                Image(systemName: needsMentor ? "lifepreserver" : "checkmark.seal")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(needsMentor ? CleanShotTheme.warning : CleanShotTheme.success)
-                    .frame(width: 34, height: 34)
+                Image(systemName: mentorName == nil ? "person.badge.plus" : "checkmark.seal")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(mentorName == nil ? CleanShotTheme.accent : CleanShotTheme.success)
+                    .frame(width: 30, height: 30)
                     .cleanShotSurface(shape: Circle(), level: .control)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(matchedMentor == nil ? (needsMentor ? "Mentor suggested" : "On track") : "Mentor connected")
+                    Text(title)
                         .font(.subheadline.weight(.semibold))
-                    Text(matchCopy)
+                    Text(message)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
-            VStack(spacing: 6) {
-                MatchFactor(label: mentor.focus, systemImage: "target", tint: CleanShotTheme.accent)
-                MatchFactor(label: mentor.timezone, systemImage: "clock", tint: CleanShotTheme.violet)
-                MatchFactor(label: mentor.language, systemImage: "text.bubble", tint: CleanShotTheme.success)
-                MatchFactor(label: "\(mentor.consistency)% consistency", systemImage: "chart.line.uptrend.xyaxis", tint: CleanShotTheme.gold)
-            }
-
-            if dashboard?.match == nil {
-                SoftActionButton(title: "Find mentor", systemImage: "person.badge.plus", action: onAssignMentor)
+            if shouldShowButton {
+                SoftActionButton(title: buttonTitle, systemImage: buttonIcon, action: onFindMentor)
+                    .disabled(!buttonEnabled)
+                    .opacity(buttonEnabled ? 1 : 0.55)
             }
         }
         .padding(12)
@@ -992,65 +963,61 @@ private struct MentorMatchCard: View {
         )
     }
 
-    private var matchCopy: String {
-        if let matchedMentor {
-            return "Matched with \(matchedMentor.displayName) for gentle accountability."
+    private var title: String {
+        if let mentorName {
+            return "Matched with \(mentorName)"
         }
 
-        if needsMentor {
-            return "Ask the backend to match you with a consistent user."
-        }
+        return canFindMentor ? "Mentor available" : "Mentor locked"
+    }
 
-        return "Keep this pace to unlock mentor eligibility."
+    private var shouldShowButton: Bool {
+        mentorName == nil ? canFindMentor : true
+    }
+
+    private var buttonTitle: String {
+        mentorName == nil ? "Find mentor" : "Change mentor"
+    }
+
+    private var buttonIcon: String {
+        mentorName == nil ? "person.badge.plus" : "arrow.triangle.2.circlepath"
+    }
+
+    private var buttonEnabled: Bool {
+        mentorName == nil ? canFindMentor : canChangeMentor
     }
 }
 
-private struct MatchFactor: View {
-    let label: String
-    let systemImage: String
-    let tint: Color
-
-    var body: some View {
-        HStack(spacing: 7) {
-            Image(systemName: systemImage)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(tint)
-                .frame(width: 16)
-            Text(label)
-                .font(.caption.weight(.medium))
-            Spacer()
-        }
-        .foregroundStyle(.secondary)
-    }
-}
-
-private struct MenteeDashboardCard: View {
+private struct SocialSummaryCard: View {
     let metrics: HabitMetrics
     let dashboard: AccountabilityDashboard?
 
-    private var mentorTip: String {
-        dashboard?.menteeDashboard.mentorTip ?? metrics.mentorTip
+    private var friendCount: Int {
+        dashboard?.social?.friendCount ?? 0
     }
 
-    private var score: Int {
-        dashboard?.menteeDashboard.progressScore ?? metrics.accountabilityScore
+    private var updateCount: Int {
+        dashboard?.social?.updates.count ?? min(metrics.feedPosts.count, 3)
+    }
+
+    private var consistencyPercent: Int {
+        dashboard?.level.weeklyConsistencyPercent ?? metrics.weeklyConsistencyPercent
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PanelTitle(systemImage: "bubble.left.and.text.bubble.right", title: "Mentee dashboard")
+            PanelTitle(systemImage: "person.2.fill", title: "Friends")
 
-            Text(mentorTip)
+            HStack(spacing: 8) {
+                SocialMetric(value: "\(friendCount)", label: "Friends", tint: CleanShotTheme.accent)
+                SocialMetric(value: "\(updateCount)", label: "Updates", tint: CleanShotTheme.success)
+                SocialMetric(value: "\(consistencyPercent)%", label: "Your week", tint: CleanShotTheme.gold)
+            }
+
+            Text("Share progress as small updates. Friends see consistency and today’s progress, not every habit detail.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-
-            HStack(spacing: 8) {
-                SoftActionButton(title: "Check in", systemImage: "checkmark.message")
-                SoftActionButton(title: "Ask for help", systemImage: "hand.raised")
-            }
-
-            SettingsRow(systemImage: "heart", title: "Progress score", value: "\(score)/100")
         }
         .padding(12)
         .cleanShotSurface(
@@ -1060,49 +1027,24 @@ private struct MenteeDashboardCard: View {
     }
 }
 
-private struct MentorDashboardCard: View {
-    let metrics: HabitMetrics
-    let dashboard: AccountabilityDashboard?
+private struct SocialMetric: View {
+    let value: String
+    let label: String
+    let tint: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            PanelTitle(systemImage: "person.crop.circle.badge.checkmark", title: "Mentor dashboard")
-
-            if let dashboard, !dashboard.mentorDashboard.mentees.isEmpty {
-                VStack(spacing: 8) {
-                    ForEach(dashboard.mentorDashboard.mentees.prefix(3)) { mentee in
-                        MenteeRow(
-                            name: mentee.displayName,
-                            detail: "\(mentee.missedHabitsToday) missed today · \(mentee.weeklyConsistencyPercent)% week",
-                            tint: mentee.missedHabitsToday > 0 ? CleanShotTheme.warning : CleanShotTheme.success
-                        )
-                    }
-                }
-
-                HStack(spacing: 8) {
-                    SoftActionButton(title: "Nudge", systemImage: "bell")
-                    SoftActionButton(title: "Encourage", systemImage: "sparkles")
-                }
-            } else if dashboard?.level.mentorEligible ?? metrics.mentorEligible {
-                VStack(spacing: 8) {
-                    MenteeRow(name: "Avery", detail: "Missed \(max(metrics.missedToday, 1)) habit today", tint: CleanShotTheme.warning)
-                    MenteeRow(name: "Noor", detail: "Needs a small win", tint: CleanShotTheme.accent)
-                }
-
-                HStack(spacing: 8) {
-                    SoftActionButton(title: "Nudge", systemImage: "bell")
-                    SoftActionButton(title: "Encourage", systemImage: "sparkles")
-                }
-            } else {
-                Text("Reach Consistent level after 7 days to help another user.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+        VStack(alignment: .leading, spacing: 3) {
+            Text(value)
+                .font(.subheadline.weight(.semibold).monospacedDigit())
+                .foregroundStyle(tint)
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
-        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(9)
         .cleanShotSurface(
-            shape: RoundedRectangle(cornerRadius: 14, style: .continuous),
+            shape: RoundedRectangle(cornerRadius: 10, style: .continuous),
             level: .control
         )
     }
@@ -1114,27 +1056,15 @@ private struct SocialFeedCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PanelTitle(systemImage: "quote.bubble", title: "Social feed")
+            PanelTitle(systemImage: "chart.line.uptrend.xyaxis", title: "Friend updates")
 
-            ForEach(displayPosts) { post in
-                HStack(alignment: .top, spacing: 9) {
-                    Image(systemName: post.systemImage)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(CleanShotTheme.accent)
-                        .frame(width: 26, height: 26)
-                        .cleanShotSurface(shape: Circle(), level: .control)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(post.author)
-                            .font(.caption.weight(.semibold))
-                        Text(post.message)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                        Text(post.meta)
-                            .font(.caption2.weight(.medium))
-                            .foregroundStyle(.tertiary)
-                    }
+            if !displayUpdates.isEmpty {
+                ForEach(displayUpdates) { update in
+                    SocialActivityRow(update: update)
+                }
+            } else {
+                ForEach(displayPosts) { post in
+                    SocialPostRow(post: post)
                 }
             }
         }
@@ -1143,6 +1073,11 @@ private struct SocialFeedCard: View {
             shape: RoundedRectangle(cornerRadius: 14, style: .continuous),
             level: .control
         )
+    }
+
+    private var displayUpdates: [AccountabilityDashboard.SocialActivity] {
+        guard let updates = dashboard?.social?.updates else { return [] }
+        return Array(updates.prefix(4))
     }
 
     private var displayPosts: [FeedPost] {
@@ -1161,22 +1096,102 @@ private struct SocialFeedCard: View {
     }
 }
 
-private struct RetentionPromptCard: View {
-    let metrics: HabitMetrics
-    let dashboard: AccountabilityDashboard?
+private struct SocialActivityRow: View {
+    let update: AccountabilityDashboard.SocialActivity
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            PanelTitle(systemImage: "bell.badge", title: "Helpful nudges")
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(tint)
+                .frame(width: 26, height: 26)
+                .cleanShotSurface(shape: Circle(), level: .control)
 
-            if let notifications = dashboard?.notifications, !notifications.isEmpty {
-                ForEach(notifications.prefix(3)) { notification in
-                    SettingsRow(systemImage: icon(for: notification.type), title: notification.title, value: "Ready")
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(update.displayName)
+                        .font(.caption.weight(.semibold))
+                    Spacer()
+                    Text("\(update.weeklyConsistencyPercent)% week")
+                        .font(.caption2.weight(.medium).monospacedDigit())
+                        .foregroundStyle(.secondary)
                 }
+
+                Text(update.message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+
+                ProgressView(value: Double(update.progressPercent), total: 100)
+                    .tint(tint)
+            }
+        }
+    }
+
+    private var icon: String {
+        switch update.kind {
+        case "PERFECT_DAY":
+            return "checkmark.seal"
+        case "CONSISTENCY":
+            return "flame"
+        default:
+            return "chart.line.uptrend.xyaxis"
+        }
+    }
+
+    private var tint: Color {
+        update.progressPercent >= 100 ? CleanShotTheme.success : CleanShotTheme.accent
+    }
+}
+
+private struct SocialPostRow: View {
+    let post: FeedPost
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: post.systemImage)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(CleanShotTheme.accent)
+                .frame(width: 26, height: 26)
+                .cleanShotSurface(shape: Circle(), level: .control)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(post.author)
+                    .font(.caption.weight(.semibold))
+                Text(post.message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                Text(post.meta)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+}
+
+private struct FriendSuggestionsCard: View {
+    let dashboard: AccountabilityDashboard?
+    let onFollow: (Int64) -> Void
+
+    private var suggestions: [AccountabilityDashboard.FriendSummary] {
+        guard let suggestions = dashboard?.social?.suggestions else { return [] }
+        return Array(suggestions.prefix(3))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            PanelTitle(systemImage: "person.badge.plus", title: "People to follow")
+
+            if suggestions.isEmpty {
+                Text("Friend suggestions appear after more people join or update their profiles.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             } else {
-                SettingsRow(systemImage: "person.wave.2", title: "Mentor checked in", value: "Ready")
-                SettingsRow(systemImage: "crown", title: "Mentor rank", value: "\(metrics.daysUntilMentor) days")
-                SettingsRow(systemImage: "hands.sparkles", title: "Guidance needed", value: metrics.mentorEligible ? "Open" : "Locked")
+                ForEach(suggestions) { friend in
+                    FriendSuggestionRow(friend: friend, onFollow: onFollow)
+                }
             }
         }
         .padding(12)
@@ -1185,17 +1200,44 @@ private struct RetentionPromptCard: View {
             level: .control
         )
     }
+}
 
-    private func icon(for type: String) -> String {
-        switch type {
-        case "MENTOR_CHECK_IN":
-            return "person.wave.2"
-        case "MENTOR_PROGRESS":
-            return "crown"
-        case "GUIDANCE_REQUEST":
-            return "hands.sparkles"
-        default:
-            return "bell"
+private struct FriendSuggestionRow: View {
+    let friend: AccountabilityDashboard.FriendSummary
+    let onFollow: (Int64) -> Void
+
+    var body: some View {
+        HStack(spacing: 9) {
+            Image(systemName: "person.crop.circle")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(CleanShotTheme.violet)
+                .frame(width: 28, height: 28)
+                .cleanShotSurface(shape: Circle(), level: .control)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(friend.displayName)
+                    .font(.caption.weight(.semibold))
+                Text(friend.goals)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Button {
+                onFollow(friend.userId)
+            } label: {
+                Text("Follow")
+                    .font(.caption2.weight(.semibold))
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+            }
+            .buttonStyle(.plain)
+            .cleanShotSurface(
+                shape: RoundedRectangle(cornerRadius: 8, style: .continuous),
+                level: .control
+            )
         }
     }
 }
@@ -1208,35 +1250,6 @@ private struct PanelTitle: View {
         Label(title, systemImage: systemImage)
             .font(.caption.weight(.semibold))
             .foregroundStyle(.secondary)
-    }
-}
-
-private struct MenteeRow: View {
-    let name: String
-    let detail: String
-    let tint: Color
-
-    var body: some View {
-        HStack(spacing: 9) {
-            Circle()
-                .fill(tint.opacity(0.16))
-                .frame(width: 26, height: 26)
-                .overlay {
-                    Text(String(name.prefix(1)))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(tint)
-                }
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(name)
-                    .font(.caption.weight(.semibold))
-                Text(detail)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-        }
     }
 }
 
@@ -2640,8 +2653,8 @@ private struct HabitMetrics {
 
     private static func feedPosts(currentPerfectStreak: Int, weeklyConsistencyPercent: Int) -> [FeedPost] {
         [
-            FeedPost(author: "Maya", message: "Finished a 7-day morning routine streak.", meta: "Community win", systemImage: "flame"),
-            FeedPost(author: "Leo", message: "Sent three check-ins and helped Noor restart.", meta: "Mentor XP +18", systemImage: "person.2"),
+            FeedPost(author: "Maya", message: "Finished a 7-day morning routine streak.", meta: "Friend update", systemImage: "flame"),
+            FeedPost(author: "Noor", message: "Hit 80% consistency after a rough start.", meta: "Progress update", systemImage: "chart.line.uptrend.xyaxis"),
             FeedPost(author: "You", message: currentPerfectStreak > 0 ? "\(currentPerfectStreak)-day streak is active." : "\(weeklyConsistencyPercent)% consistency this week.", meta: "Progress update", systemImage: "chart.line.uptrend.xyaxis")
         ]
     }
