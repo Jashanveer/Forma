@@ -619,6 +619,118 @@ private struct CenterPanel: View {
     }
 }
 
+// MARK: - Floating Habit Background
+
+private struct HabitChipView: View {
+    let label: String
+    let icon: String
+    let color: Color
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(color)
+            Text(label)
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(colorScheme == .dark ? Color.white.opacity(0.82) : Color.black.opacity(0.72))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 11)
+        .background {
+            Capsule()
+                .fill(colorScheme == .dark ? color.opacity(0.14) : color.opacity(0.10))
+                .overlay {
+                    Capsule()
+                        .strokeBorder(colorScheme == .dark ? color.opacity(0.30) : color.opacity(0.35), lineWidth: 1)
+                }
+        }
+    }
+}
+
+private struct FloatingHabitBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private struct HabitItem {
+        let label: String
+        let icon: String
+        let color: Color
+        let x: CGFloat     // normalized 0…1
+        let y: CGFloat     // normalized 0…1
+        let scale: CGFloat
+        let opacity: Double
+        let phaseOffset: Double
+        let amplitude: CGFloat
+    }
+
+    private let items: [HabitItem] = [
+        // Row 1 — top strip
+        .init(label: "Running",       icon: "figure.run",           color: .blue,   x: 0.06, y: 0.10, scale: 1.10, opacity: 0.55, phaseOffset: 0.0,  amplitude: 9),
+        .init(label: "Yoga",          icon: "figure.yoga",          color: .teal,   x: 0.28, y: 0.07, scale: 1.00, opacity: 0.48, phaseOffset: 3.0,  amplitude: 6),
+        .init(label: "Meditation",    icon: "brain.head.profile",   color: .purple, x: 0.54, y: 0.10, scale: 1.15, opacity: 0.50, phaseOffset: 1.2,  amplitude: 11),
+        .init(label: "Walking",       icon: "figure.walk",          color: .teal,   x: 0.76, y: 0.07, scale: 1.00, opacity: 0.55, phaseOffset: 4.5,  amplitude: 9),
+        .init(label: "Sleep",         icon: "moon.zzz",             color: .indigo, x: 0.94, y: 0.11, scale: 1.05, opacity: 0.50, phaseOffset: 4.0,  amplitude: 8),
+        // Row 2
+        .init(label: "Reading",       icon: "book",                 color: .orange, x: 0.04, y: 0.26, scale: 1.00, opacity: 0.60, phaseOffset: 2.1,  amplitude: 7),
+        .init(label: "Music",         icon: "music.note",           color: .pink,   x: 0.22, y: 0.23, scale: 1.00, opacity: 0.48, phaseOffset: 1.5,  amplitude: 10),
+        .init(label: "Journaling",    icon: "pencil",               color: Color(red: 0.94, green: 0.74, blue: 0.24), x: 0.46, y: 0.26, scale: 1.00, opacity: 0.50, phaseOffset: 1.8, amplitude: 10),
+        .init(label: "Stretching",    icon: "figure.flexibility",   color: .pink,   x: 0.70, y: 0.23, scale: 0.95, opacity: 0.50, phaseOffset: 5.0,  amplitude: 7),
+        .init(label: "Cycling",       icon: "bicycle",              color: .green,  x: 0.90, y: 0.27, scale: 1.10, opacity: 0.45, phaseOffset: 0.3,  amplitude: 9),
+        // Row 3 — middle
+        .init(label: "Cold Shower",   icon: "snowflake",            color: .cyan,   x: 0.04, y: 0.44, scale: 0.95, opacity: 0.45, phaseOffset: 6.2,  amplitude: 8),
+        .init(label: "Drawing",       icon: "paintbrush",           color: .purple, x: 0.25, y: 0.42, scale: 1.10, opacity: 0.42, phaseOffset: 6.0,  amplitude: 8),
+        .init(label: "Vitamins",      icon: "pill",                 color: Color(red: 0.46, green: 0.48, blue: 0.84), x: 0.50, y: 0.45, scale: 0.98, opacity: 0.40, phaseOffset: 5.5, amplitude: 6),
+        .init(label: "Cooking",       icon: "fork.knife",           color: .green,  x: 0.74, y: 0.42, scale: 1.10, opacity: 0.55, phaseOffset: 0.7,  amplitude: 9),
+        .init(label: "Gratitude",     icon: "heart",                color: .red,    x: 0.94, y: 0.44, scale: 1.05, opacity: 0.50, phaseOffset: 3.5,  amplitude: 8),
+        // Row 4
+        .init(label: "Study",         icon: "graduationcap",        color: .orange, x: 0.06, y: 0.62, scale: 1.00, opacity: 0.48, phaseOffset: 2.8,  amplitude: 7),
+        .init(label: "Hydration",     icon: "drop",                 color: .cyan,   x: 0.26, y: 0.60, scale: 1.00, opacity: 0.55, phaseOffset: 2.5,  amplitude: 7),
+        .init(label: "Photography",   icon: "camera",               color: .blue,   x: 0.50, y: 0.63, scale: 0.95, opacity: 0.45, phaseOffset: 3.8,  amplitude: 8),
+        .init(label: "Journaling",    icon: "doc.text",             color: Color(red: 0.94, green: 0.74, blue: 0.24), x: 0.73, y: 0.60, scale: 1.00, opacity: 0.42, phaseOffset: 7.0, amplitude: 9),
+        .init(label: "Mindfulness",   icon: "sparkles",             color: .purple, x: 0.93, y: 0.62, scale: 1.05, opacity: 0.45, phaseOffset: 2.2,  amplitude: 10),
+        // Row 5 — bottom strip
+        .init(label: "Strength",      icon: "dumbbell",             color: .red,    x: 0.08, y: 0.80, scale: 1.05, opacity: 0.50, phaseOffset: 0.9,  amplitude: 8),
+        .init(label: "Language",      icon: "character.bubble",     color: .green,  x: 0.28, y: 0.83, scale: 0.95, opacity: 0.45, phaseOffset: 4.8,  amplitude: 7),
+        .init(label: "Cycling",       icon: "bicycle",              color: .teal,   x: 0.52, y: 0.80, scale: 1.10, opacity: 0.48, phaseOffset: 1.1,  amplitude: 9),
+        .init(label: "Breathing",     icon: "wind",                 color: .indigo, x: 0.74, y: 0.84, scale: 1.00, opacity: 0.45, phaseOffset: 5.7,  amplitude: 7),
+        .init(label: "Sleep Diary",   icon: "bed.double",           color: .blue,   x: 0.93, y: 0.80, scale: 0.95, opacity: 0.50, phaseOffset: 3.3,  amplitude: 8),
+    ]
+
+    var body: some View {
+        GeometryReader { geo in
+            TimelineView(.animation) { timeline in
+                let t = timeline.date.timeIntervalSinceReferenceDate
+                ZStack {
+                    if colorScheme == .dark {
+                        Color.black
+                    } else {
+                        Color.white
+                    }
+
+                    ForEach(items.indices, id: \.self) { i in
+                        let item = items[i]
+                        let yOffset = sin(t * 0.55 + item.phaseOffset) * item.amplitude
+                        let xOffset = cos(t * 0.38 + item.phaseOffset) * (item.amplitude * 0.45)
+
+                        HabitChipView(label: item.label, icon: item.icon, color: item.color)
+                            .scaleEffect(item.scale)
+                            .opacity(item.opacity)
+                            .offset(x: xOffset, y: yOffset)
+                            .position(
+                                x: item.x * geo.size.width,
+                                y: item.y * geo.size.height
+                            )
+                    }
+                }
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - Auth Gate
+
 private struct AuthGateView: View {
     @ObservedObject var backend: HabitBackendStore
     let onAuthenticated: () -> Void
@@ -633,9 +745,7 @@ private struct AuthGateView: View {
 
     var body: some View {
         ZStack {
-            CleanShotTheme.canvas(for: colorScheme)
-                .opacity(0.97)
-                .ignoresSafeArea()
+            FloatingHabitBackground()
 
             VStack(spacing: 18) {
                 VStack(spacing: 6) {
