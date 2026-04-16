@@ -29,8 +29,10 @@ struct AccountabilityDashboard: Decodable {
 
     struct Profile: Decodable {
         let userId: Int64
+        let username: String?
         let email: String
         let displayName: String
+        let avatarUrl: String?
         let timezone: String
         let language: String
         let goals: String
@@ -189,12 +191,12 @@ final class HabitBackendStore: ObservableObject {
         token = UserDefaults.standard.string(forKey: tokenKey)
     }
 
-    func signIn(email: String, password: String) async {
-        await authenticate(email: email, password: password, mode: .login)
+    func signIn(username: String, password: String) async {
+        await authenticate(username: username, email: nil, password: password, avatarURL: nil, mode: .login)
     }
 
-    func register(email: String, password: String) async {
-        await authenticate(email: email, password: password, mode: .register)
+    func register(username: String, email: String, password: String, avatarURL: String) async {
+        await authenticate(username: username, email: email, password: password, avatarURL: avatarURL, mode: .register)
     }
 
     func signOut() {
@@ -282,7 +284,7 @@ final class HabitBackendStore: ObservableObject {
         case register
     }
 
-    private func authenticate(email: String, password: String, mode: AuthMode) async {
+    private func authenticate(username: String, email: String?, password: String, avatarURL: String?, mode: AuthMode) async {
         isSyncing = true
         defer { isSyncing = false }
 
@@ -290,9 +292,14 @@ final class HabitBackendStore: ObservableObject {
             let issuedToken: String
             switch mode {
             case .login:
-                issuedToken = try await client.login(email: email, password: password)
+                issuedToken = try await client.login(username: username, password: password)
             case .register:
-                issuedToken = try await client.register(email: email, password: password)
+                issuedToken = try await client.register(
+                    username: username,
+                    email: email ?? "",
+                    password: password,
+                    avatarURL: avatarURL ?? ""
+                )
             }
 
             token = issuedToken
@@ -334,20 +341,20 @@ private struct HabitBackendClient {
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
-    func login(email: String, password: String) async throws -> String {
+    func login(username: String, password: String) async throws -> String {
         let response: AuthResponse = try await request(
             path: "/api/auth/login",
             method: "POST",
-            body: AuthRequest(email: email, password: password)
+            body: LoginRequest(username: username, password: password)
         )
         return response.token
     }
 
-    func register(email: String, password: String) async throws -> String {
+    func register(username: String, email: String, password: String, avatarURL: String) async throws -> String {
         let response: AuthResponse = try await request(
             path: "/api/auth/register",
             method: "POST",
-            body: AuthRequest(email: email, password: password)
+            body: RegisterRequest(username: username, email: email, password: password, avatarUrl: avatarURL)
         )
         return response.token
     }
@@ -460,9 +467,16 @@ private struct HabitBackendClient {
         }
     }
 
-    private struct AuthRequest: Encodable {
+    private struct LoginRequest: Encodable {
+        let username: String
+        let password: String
+    }
+
+    private struct RegisterRequest: Encodable {
+        let username: String
         let email: String
         let password: String
+        let avatarUrl: String
     }
 
     private struct AuthResponse: Decodable {

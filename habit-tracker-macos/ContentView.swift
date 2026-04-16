@@ -317,7 +317,7 @@ struct ContentView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if showMentorCharacter {
+            if showMentorCharacter && backend.isAuthenticated {
                 MentorCharacterView(backend: backend, nudge: $mentorNudge)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
@@ -624,43 +624,65 @@ private struct AuthGateView: View {
     let onAuthenticated: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var mode: AuthMode = .signIn
+    @State private var username = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var selectedAvatarID = AvatarChoice.options[0].id
     @State private var validationMessage: String?
 
     var body: some View {
         ZStack {
             CleanShotTheme.canvas(for: colorScheme)
-                .opacity(0.92)
+                .opacity(0.97)
                 .ignoresSafeArea()
 
             VStack(spacing: 18) {
-                VStack(spacing: 8) {
-                    Image(systemName: "lock.laptopcomputer")
-                        .font(.system(size: 30, weight: .semibold))
-                        .foregroundStyle(CleanShotTheme.accent)
-                        .frame(width: 58, height: 58)
-                        .cleanShotSurface(shape: RoundedRectangle(cornerRadius: 16, style: .continuous), level: .control)
-
-                    Text("Connect your habits")
-                        .font(.system(size: 26, weight: .semibold, design: .rounded))
-                    Text("Sign in to sync with the backend running on localhost:8080.")
+                VStack(spacing: 6) {
+                    Text(mode.title)
+                        .font(.system(size: 28, weight: .semibold, design: .rounded))
+                    Text(mode.subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: 360)
+                        .frame(maxWidth: 400)
                 }
 
-                VStack(spacing: 10) {
-                    TextField("Email", text: $email)
+                HStack(spacing: 6) {
+                    AuthModeButton(title: "Sign in", isSelected: mode == .signIn) {
+                        switchMode(.signIn)
+                    }
+                    AuthModeButton(title: "Sign up", isSelected: mode == .signUp) {
+                        switchMode(.signUp)
+                    }
+                }
+                .frame(width: 340)
+                .padding(4)
+                .cleanShotSurface(shape: RoundedRectangle(cornerRadius: 12, style: .continuous), level: .control)
+
+                VStack(spacing: 12) {
+                    TextField("Username", text: $username)
                         .textFieldStyle(.plain)
                         .font(.system(size: 14))
                         .padding(.horizontal, 14)
                         .frame(height: 44)
                         .cleanShotSurface(shape: Capsule(), level: .control)
                         .onSubmit {
-                            submit(mode: .login)
+                            submit()
                         }
+
+                    if mode == .signUp {
+                        TextField("Email", text: $email)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 14))
+                            .padding(.horizontal, 14)
+                            .frame(height: 44)
+                            .cleanShotSurface(shape: Capsule(), level: .control)
+                            .onSubmit {
+                                submit()
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
 
                     SecureField("Password", text: $password)
                         .textFieldStyle(.plain)
@@ -669,8 +691,29 @@ private struct AuthGateView: View {
                         .frame(height: 44)
                         .cleanShotSurface(shape: Capsule(), level: .control)
                         .onSubmit {
-                            submit(mode: .login)
+                            submit()
                         }
+
+                    if mode == .signUp {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Choose an avatar")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
+                            LazyVGrid(columns: Array(repeating: GridItem(.fixed(54), spacing: 10), count: 5), spacing: 10) {
+                                ForEach(AvatarChoice.options) { avatar in
+                                    AvatarChoiceButton(
+                                        avatar: avatar,
+                                        isSelected: avatar.id == selectedAvatarID
+                                    ) {
+                                        selectedAvatarID = avatar.id
+                                    }
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
 
                     if let message = validationMessage ?? backend.errorMessage {
                         Text(message)
@@ -682,7 +725,7 @@ private struct AuthGateView: View {
 
                     HStack(spacing: 10) {
                         Button {
-                            submit(mode: .login)
+                            submit()
                         } label: {
                             HStack(spacing: 8) {
                                 if backend.isSyncing {
@@ -690,7 +733,7 @@ private struct AuthGateView: View {
                                         .controlSize(.small)
                                         .tint(.white)
                                 }
-                                Text("Sign in")
+                                Text(mode.primaryActionTitle)
                                     .font(.subheadline.weight(.semibold))
                             }
                             .frame(maxWidth: .infinity)
@@ -699,9 +742,9 @@ private struct AuthGateView: View {
                         .buttonStyle(PrimaryCapsuleButtonStyle())
 
                         Button {
-                            submit(mode: .register)
+                            switchMode(mode == .signIn ? .signUp : .signIn)
                         } label: {
-                            Text("Create account")
+                            Text(mode.secondaryActionTitle)
                                 .font(.subheadline.weight(.semibold))
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 42)
@@ -710,7 +753,7 @@ private struct AuthGateView: View {
                     }
                     .disabled(backend.isSyncing)
                 }
-                .frame(width: 360)
+                .frame(width: 400)
             }
             .padding(28)
             .cleanShotSurface(
@@ -722,37 +765,182 @@ private struct AuthGateView: View {
     }
 
     private enum AuthMode {
-        case login
-        case register
+        case signIn
+        case signUp
+
+        var title: String {
+            switch self {
+            case .signIn:
+                return "Welcome back"
+            case .signUp:
+                return "Create your profile"
+            }
+        }
+
+        var subtitle: String {
+            switch self {
+            case .signIn:
+                return "Use your username to sync with localhost:8080."
+            case .signUp:
+                return "Pick a username and a character for your habit profile."
+            }
+        }
+
+        var primaryActionTitle: String {
+            switch self {
+            case .signIn:
+                return "Sign in"
+            case .signUp:
+                return "Create account"
+            }
+        }
+
+        var secondaryActionTitle: String {
+            switch self {
+            case .signIn:
+                return "Create account"
+            case .signUp:
+                return "I have an account"
+            }
+        }
     }
 
-    private func submit(mode: AuthMode) {
+    private var selectedAvatar: AvatarChoice {
+        AvatarChoice.options.first { $0.id == selectedAvatarID } ?? AvatarChoice.options[0]
+    }
+
+    private func switchMode(_ nextMode: AuthMode) {
+        withAnimation(.smooth(duration: 0.2)) {
+            mode = nextMode
+            validationMessage = nil
+            backend.errorMessage = nil
+        }
+    }
+
+    private func submit() {
+        let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         validationMessage = nil
         backend.errorMessage = nil
 
-        guard trimmedEmail.contains("@") else {
+        guard isValidUsername(trimmedUsername) else {
+            validationMessage = "Use 3-30 letters, numbers, or underscores for username."
+            return
+        }
+
+        if mode == .signUp && !trimmedEmail.contains("@") {
             validationMessage = "Enter a valid email address."
             return
         }
 
-        guard password.count >= 8 else {
+        guard mode == .signIn ? !password.isEmpty : password.count >= 8 else {
             validationMessage = "Password must be at least 8 characters."
             return
         }
 
         Task {
             switch mode {
-            case .login:
-                await backend.signIn(email: trimmedEmail, password: password)
-            case .register:
-                await backend.register(email: trimmedEmail, password: password)
+            case .signIn:
+                await backend.signIn(username: trimmedUsername, password: password)
+            case .signUp:
+                await backend.register(
+                    username: trimmedUsername,
+                    email: trimmedEmail,
+                    password: password,
+                    avatarURL: selectedAvatar.url
+                )
             }
 
             if backend.isAuthenticated {
                 onAuthenticated()
             }
         }
+    }
+
+    private func isValidUsername(_ value: String) -> Bool {
+        guard (3...30).contains(value.count) else { return false }
+        return value.range(of: "^[A-Za-z0-9_]+$", options: .regularExpression) != nil
+    }
+}
+
+private struct AvatarChoice: Identifiable {
+    let id: String
+    let name: String
+    let url: String
+
+    static let options: [AvatarChoice] = [
+        .init(id: "nova", name: "Nova", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Nova&size=96"),
+        .init(id: "milo", name: "Milo", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Milo&size=96"),
+        .init(id: "luna", name: "Luna", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Luna&size=96"),
+        .init(id: "kai", name: "Kai", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Kai&size=96"),
+        .init(id: "sage", name: "Sage", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Sage&size=96"),
+        .init(id: "zara", name: "Zara", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Zara&size=96"),
+        .init(id: "rio", name: "Rio", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Rio&size=96"),
+        .init(id: "ivy", name: "Ivy", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Ivy&size=96"),
+        .init(id: "leo", name: "Leo", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Leo&size=96"),
+        .init(id: "maya", name: "Maya", url: "https://api.dicebear.com/9.x/adventurer/png?seed=Maya&size=96")
+    ]
+}
+
+private struct AuthModeButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(isSelected ? .white : .secondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 30)
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(CleanShotTheme.accent)
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct AvatarChoiceButton: View {
+    let avatar: AvatarChoice
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                AsyncImage(url: URL(string: avatar.url)) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } placeholder: {
+                    Image(systemName: "person.crop.circle.fill")
+                        .font(.system(size: 30, weight: .semibold))
+                        .foregroundStyle(CleanShotTheme.accent)
+                }
+                .frame(width: 42, height: 42)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                Text(avatar.name)
+                    .font(.system(size: 9, weight: .medium))
+                    .lineLimit(1)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: 54, height: 64)
+            .background {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isSelected ? CleanShotTheme.accent.opacity(0.16) : Color.clear)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(isSelected ? CleanShotTheme.accent : Color.primary.opacity(0.12), lineWidth: isSelected ? 2 : 1)
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 
