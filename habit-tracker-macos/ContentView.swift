@@ -1,3 +1,4 @@
+import Combine
 import SwiftData
 import SwiftUI
 
@@ -6,8 +7,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<Habit> { !$0.isArchived }, sort: \Habit.createdAt) private var habits: [Habit]
     @StateObject private var backend = HabitBackendStore()
-    @StateObject private var locationManager = LocationReminderManager()
-    private let locationNotifier = LocationReminderNotifier()
+    @StateObject private var timeReminderManager = TimeReminderManager()
 
     @State private var hasCompletedOnboarding = false
     @State private var newHabitTitle = ""
@@ -52,7 +52,6 @@ struct ContentView: View {
             newHabitTitle: $newHabitTitle,
             metrics: metrics,
             backend: backend,
-            locationManager: locationManager,
             progressOpen: $progressOpen,
             calendarOpen: $calendarOpen,
             settingsOpen: $settingsOpen,
@@ -67,11 +66,9 @@ struct ContentView: View {
             onDeleteHabit: archiveHabit,
             onSync: syncWithBackend,
             onFindMentor: assignMentor,
+            onReminderChange: updateReminderWindow,
             onCompleteOnboarding: completeOnboarding
         )
-        .onChange(of: locationManager.currentContext) { _, newContext in
-            locationNotifier.contextDidChange(to: newContext, habits: habits, todayKey: todayKey)
-        }
         .onChange(of: backend.isAuthenticated) { _, isAuth in
             hasCompletedOnboarding = isAuth
                 ? UserDefaults.standard.bool(forKey: onboardingKey)
@@ -81,6 +78,10 @@ struct ContentView: View {
             if backend.isAuthenticated {
                 hasCompletedOnboarding = UserDefaults.standard.bool(forKey: onboardingKey)
             }
+            refreshTimeReminders()
+        }
+        .onReceive(Timer.publish(every: 300, on: .main, in: .common).autoconnect()) { _ in
+            refreshTimeReminders()
         }
         .animation(.smooth(duration: 0.2), value: colorScheme)
         .task {
@@ -115,8 +116,9 @@ struct ContentView: View {
 
         Task {
             do {
-                let remoteHabit = try await backend.createHabit(title: title)
+                let remoteHabit = try await backend.createHabit(title: title, reminderWindow: localHabit.reminderWindow)
                 localHabit.backendId  = remoteHabit.id
+                localHabit.reminderWindow = remoteHabit.reminderWindow
                 localHabit.syncStatus = .synced
                 localHabit.updatedAt  = Date()
                 backend.statusMessage = "Habit synced"
@@ -126,6 +128,7 @@ struct ContentView: View {
                 localHabit.syncStatus = .failed
                 backend.errorMessage  = error.localizedDescription
             }
+            refreshTimeReminders()
         }
     }
 
@@ -142,6 +145,7 @@ struct ContentView: View {
                 backend.statusMessage = "Synced with \(BackendEnvironment.displayHost)"
                 backend.errorMessage  = nil
                 await backend.refreshDashboard()
+                refreshTimeReminders()
             } catch {
                 backend.errorMessage = error.localizedDescription
             }
@@ -155,8 +159,9 @@ struct ContentView: View {
         for habit in SyncEngine.pendingCreates(in: habits) {
             habit.syncStatus = .pending
             do {
-                let remote = try await backend.createHabit(title: habit.title)
+                let remote = try await backend.createHabit(title: habit.title, reminderWindow: habit.reminderWindow)
                 habit.backendId  = remote.id
+                habit.reminderWindow = remote.reminderWindow
                 // Upload any pre-existing checks for this habit
                 for dayKey in habit.completedDayKeys {
                     try await backend.setCheck(habitID: remote.id, dateKey: dayKey, done: true)
@@ -169,7 +174,28 @@ struct ContentView: View {
             }
         }
 
-        // 2. Retry failed habits with no specific pending check — re-push all done keys
+        // 2. Push metadata changes for existing habits, including reminder windows.
+        for habit in habits where habit.backendId != nil && (habit.syncStatus == .pending || habit.syncStatus == .failed) {
+            guard let bid = habit.backendId else { continue }
+            do {
+                let remote = try await backend.updateHabit(
+                    habitID: bid,
+                    title: habit.title,
+                    reminderWindow: habit.reminderWindow
+                )
+                habit.title = remote.title
+                habit.reminderWindow = remote.reminderWindow
+                if habit.pendingCheckDayKey == nil && habit.syncStatus == .pending {
+                    habit.syncStatus = .synced
+                }
+                habit.updatedAt = Date()
+            } catch {
+                habit.syncStatus = .failed
+                throw error
+            }
+        }
+
+        // 3. Retry failed habits with no specific pending check — re-push all done keys
         // (Skip habits that have a pendingCheckDayKey; those are handled precisely in step 3.)
         for habit in SyncEngine.failedUploads(in: habits) where habit.pendingCheckDayKey == nil {
             guard let bid = habit.backendId else { continue }
@@ -177,14 +203,16 @@ struct ContentView: View {
                 for dayKey in habit.completedDayKeys {
                     try await backend.setCheck(habitID: bid, dateKey: dayKey, done: true)
                 }
-                habit.syncStatus = .synced
+                if habit.pendingCheckDayKey == nil {
+                    habit.syncStatus = .synced
+                }
                 habit.updatedAt  = Date()
             } catch {
                 // Leave as .failed — the badge will invite the user to retry manually
             }
         }
 
-        // 3. Push pending check-state (toggles that weren't confirmed, including unchecks).
+        // 4. Push pending check-state (toggles that weren't confirmed, including unchecks).
         // This is the fix for: offline toggle → sync → server-wins overwrites the pending toggle.
         // We process habits where pendingCheckDayKey is set regardless of syncStatus so that
         // both the in-flight `.pending` case and the failed `.failed` case are retried.
@@ -215,6 +243,7 @@ struct ContentView: View {
             // already excluded from toUpdate, but guard against future edge cases).
             guard local.syncStatus == .synced || local.syncStatus == .failed else { continue }
             local.title             = remote.title
+            local.reminderWindow    = remote.reminderWindow
             local.completedDayKeys  = remote.completedDayKeys
             local.syncStatus        = .synced
             local.updatedAt         = Date()
@@ -224,7 +253,8 @@ struct ContentView: View {
                 title: remote.title,
                 completedDayKeys: remote.completedDayKeys,
                 backendId: remote.id,
-                syncStatus: .synced
+                syncStatus: .synced,
+                reminderWindow: remote.reminderWindow
             ))
         }
         for habit in result.toDelete {
@@ -262,6 +292,8 @@ struct ContentView: View {
             if doneAfter == habits.count { triggerCelebration() }
         }
 
+        refreshTimeReminders()
+
         guard let backendId = habit.backendId, backend.isAuthenticated else { return }
         Task {
             do {
@@ -274,6 +306,7 @@ struct ContentView: View {
                 habit.syncStatus = .failed
                 backend.errorMessage = error.localizedDescription
             }
+            refreshTimeReminders()
         }
     }
 
@@ -291,8 +324,41 @@ struct ContentView: View {
             do {
                 try await backend.deleteHabit(habitID: backendId)
                 await backend.refreshDashboard()
+                refreshTimeReminders()
             } catch {
                 backend.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func updateReminderWindow(_ habit: Habit, _ window: HabitReminderWindow?) {
+        withAnimation(.smooth(duration: 0.16)) {
+            habit.reminderWindow = window?.rawValue
+            habit.updatedAt = Date()
+            if habit.backendId != nil {
+                habit.syncStatus = .pending
+            }
+        }
+
+        refreshTimeReminders()
+
+        guard let backendId = habit.backendId, backend.isAuthenticated else { return }
+        Task {
+            do {
+                let remote = try await backend.updateHabit(
+                    habitID: backendId,
+                    title: habit.title,
+                    reminderWindow: habit.reminderWindow
+                )
+                habit.title = remote.title
+                habit.reminderWindow = remote.reminderWindow
+                habit.syncStatus = .synced
+                habit.updatedAt = Date()
+                refreshTimeReminders()
+            } catch {
+                habit.syncStatus = .failed
+                backend.errorMessage = error.localizedDescription
+                refreshTimeReminders()
             }
         }
     }
@@ -308,6 +374,7 @@ struct ContentView: View {
         }
         UserDefaults.standard.set(true, forKey: onboardingKey)
         hasCompletedOnboarding = true
+        refreshTimeReminders()
         if !habitTitles.isEmpty { syncWithBackend() }
     }
 
@@ -324,6 +391,9 @@ struct ContentView: View {
         Task { await backend.assignMentor() }
     }
 
+    private func refreshTimeReminders() {
+        timeReminderManager.refreshReminders(for: habits, todayKey: todayKey)
+    }
 }
 
 #Preview("Light") {

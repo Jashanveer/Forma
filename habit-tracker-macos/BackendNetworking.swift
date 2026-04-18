@@ -435,8 +435,20 @@ struct HabitRepository {
         try await client.authorizedRequest(path: "/api/habits", method: "GET")
     }
 
-    func createHabit(title: String) async throws -> BackendHabit {
-        try await client.authorizedRequest(path: "/api/habits", method: "POST", body: HabitCreateRequest(title: title))
+    func createHabit(title: String, reminderWindow: String?) async throws -> BackendHabit {
+        try await client.authorizedRequest(
+            path: "/api/habits",
+            method: "POST",
+            body: HabitWriteRequest(title: title, reminderWindow: reminderWindow)
+        )
+    }
+
+    func updateHabit(habitID: Int64, title: String, reminderWindow: String?) async throws -> BackendHabit {
+        try await client.authorizedRequest(
+            path: "/api/habits/\(habitID)",
+            method: "PUT",
+            body: HabitWriteRequest(title: title, reminderWindow: reminderWindow)
+        )
     }
 
     func setCheck(habitID: Int64, dateKey: String, done: Bool) async throws -> BackendHabit {
@@ -451,7 +463,10 @@ struct HabitRepository {
         let _: EmptyResponse = try await client.authorizedRequest(path: "/api/habits/\(habitID)", method: "DELETE")
     }
 
-    private struct HabitCreateRequest:  Encodable { let title: String }
+    private struct HabitWriteRequest: Encodable {
+        let title: String
+        let reminderWindow: String?
+    }
     private struct CheckUpdateRequest:  Encodable { let done: Bool }
     private struct EmptyResponse: Decodable {}
 }

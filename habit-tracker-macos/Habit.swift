@@ -36,9 +36,8 @@ final class Habit {
     /// The done value that should be sent for `pendingCheckDayKey`.
     var pendingCheckIsDone: Bool
 
-    /// Raw value of `LocationContext` (e.g. "Home", "Work", "Gym", "Other").
-    /// Optional so SwiftData can add this field without a migration.
-    var locationContext: String?
+    /// Raw value of `HabitReminderWindow`; nil means no time-window reminder.
+    var reminderWindow: String?
 
     /// When true the habit is hidden from the dashboard and removed from sync.
     /// History is preserved locally so streaks remain intact.
@@ -53,6 +52,7 @@ final class Habit {
         syncStatus: SyncStatus = .pending,
         pendingCheckDayKey: String? = nil,
         pendingCheckIsDone: Bool = false,
+        reminderWindow: String? = nil,
         isArchived: Bool = false
     ) {
         self.title = title
@@ -63,6 +63,7 @@ final class Habit {
         self.syncStatus = syncStatus
         self.pendingCheckDayKey = pendingCheckDayKey
         self.pendingCheckIsDone = pendingCheckIsDone
+        self.reminderWindow = reminderWindow
         self.isArchived = isArchived
     }
 }

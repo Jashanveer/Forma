@@ -4,9 +4,9 @@ struct SettingsPanel: View {
     let metrics: HabitMetrics
     @ObservedObject var backend: HabitBackendStore
     let habits: [Habit]
-    @ObservedObject var locationManager: LocationReminderManager
     let onSync: () -> Void
     let onFindMentor: () -> Void
+    let onReminderChange: (Habit, HabitReminderWindow?) -> Void
 
     @State private var showDeleteConfirm = false
 
@@ -45,7 +45,10 @@ struct SettingsPanel: View {
                     }
                 }
 
-                LocationRemindersCard(habits: habits, locationManager: locationManager)
+                TimeRemindersCard(
+                    habits: habits,
+                    onReminderChange: onReminderChange
+                )
             }
             .padding(16)
         }
@@ -562,112 +565,51 @@ struct SettingsMetric: View {
     }
 }
 
-// MARK: - Location Reminders Card
+// MARK: - Time Reminders Card
 
-struct LocationRemindersCard: View {
+struct TimeRemindersCard: View {
     let habits: [Habit]
-    @ObservedObject var locationManager: LocationReminderManager
+    let onReminderChange: (Habit, HabitReminderWindow?) -> Void
+
+    private var reminderCount: Int {
+        habits.filter { $0.reminderWindow != nil }.count
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PanelTitle(systemImage: "location.fill", title: "Location reminders")
+            PanelTitle(systemImage: "clock.badge.checkmark", title: "Time reminders")
 
-            // Current network status
-            HStack(spacing: 8) {
-                Image(systemName: locationManager.currentContext.systemImage)
+            HStack(spacing: 10) {
+                Image(systemName: "bell.badge")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(locationManager.currentContext == .unknown ? .secondary : CleanShotTheme.accent)
+                    .foregroundStyle(CleanShotTheme.accent)
                     .frame(width: 26, height: 26)
                     .cleanShotSurface(shape: Circle(), level: .control)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(locationManager.currentSSID ?? "Not connected")
+                    Text(reminderCount == 0 ? "No reminder windows" : "\(reminderCount) reminder window\(reminderCount == 1 ? "" : "s")")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(locationManager.currentSSID == nil ? .secondary : .primary)
-                    Text(locationManager.currentContext == .unknown
-                         ? "No location label"
-                         : locationManager.currentContext.rawValue)
+                    Text("Morning 9 AM · Afternoon 2 PM · Evening 7 PM")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-
-                Spacer()
-
-                // Label current network button
-                if let ssid = locationManager.currentSSID {
-                    Menu {
-                        ForEach(LocationContext.allCases.filter { $0 != .unknown }) { context in
-                            Button {
-                                locationManager.labelSSID(ssid, as: context)
-                            } label: {
-                                Label(context.rawValue, systemImage: context.systemImage)
-                            }
-                        }
-                    } label: {
-                        Text("Label")
-                            .font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 9)
-                            .padding(.vertical, 5)
-                    }
-                    .buttonStyle(.plain)
-                    .cleanShotSurface(
-                        shape: RoundedRectangle(cornerRadius: 8, style: .continuous),
-                        level: .control
-                    )
-                }
             }
 
-            // Existing SSID → context labels
-            if !locationManager.wifiLabels.isEmpty {
-                Divider()
-
-                ForEach(Array(locationManager.wifiLabels.keys.sorted()), id: \.self) { ssid in
-                    if let context = locationManager.wifiLabels[ssid] {
-                        HStack(spacing: 8) {
-                            Image(systemName: context.systemImage)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(CleanShotTheme.accent)
-                                .frame(width: 22, height: 22)
-                                .cleanShotSurface(shape: Circle(), level: .control)
-
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(ssid)
-                                    .font(.caption.weight(.semibold))
-                                    .lineLimit(1)
-                                Text(context.rawValue)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            Spacer()
-
-                            Button {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.78)) {
-                                    locationManager.removeLabel(for: ssid)
-                                }
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
-
-            // Hint text
-            Text("Assign habits to locations below to get reminders when you arrive.")
+            Text("Pick a gentle window for habits that need a nudge. Notifications are scheduled only for unfinished habits.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // Per-habit location picker
             if !habits.isEmpty {
                 Divider()
 
-                ForEach(habits) { habit in
-                    HabitLocationRow(habit: habit)
+                VStack(spacing: 10) {
+                    ForEach(habits) { habit in
+                        HabitTimeReminderRow(
+                            habit: habit,
+                            onReminderChange: onReminderChange
+                        )
+                    }
                 }
             }
         }
@@ -679,38 +621,87 @@ struct LocationRemindersCard: View {
     }
 }
 
-private struct HabitLocationRow: View {
+private struct HabitTimeReminderRow: View {
     let habit: Habit
-    @State private var selectedContext: LocationContext = .unknown
+    let onReminderChange: (Habit, HabitReminderWindow?) -> Void
+
+    @State private var selectedWindow: HabitReminderWindow?
 
     var body: some View {
-        HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(habit.title)
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
 
-            Spacer()
-
-            Picker("", selection: $selectedContext) {
-                Text("None").tag(LocationContext.unknown)
-                ForEach(LocationContext.allCases.filter { $0 != .unknown }) { ctx in
-                    Label(ctx.rawValue, systemImage: ctx.systemImage).tag(ctx)
+            HStack(spacing: 6) {
+                TimeReminderOptionButton(
+                    title: "None",
+                    subtitle: "",
+                    systemImage: "bell.slash",
+                    isSelected: selectedWindow == nil
+                ) {
+                    selectedWindow = nil
+                    onReminderChange(habit, nil)
                 }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-            .font(.caption2)
-            .frame(maxWidth: 100)
-            .onChange(of: selectedContext) { _, newContext in
-                habit.locationContext = newContext == .unknown ? nil : newContext.rawValue
+
+                ForEach(HabitReminderWindow.allCases) { window in
+                    TimeReminderOptionButton(
+                        title: window.rawValue,
+                        subtitle: window.subtitle,
+                        systemImage: window.systemImage,
+                        isSelected: selectedWindow == window
+                    ) {
+                        selectedWindow = window
+                        onReminderChange(habit, window)
+                    }
+                }
             }
         }
         .onAppear {
-            if let raw = habit.locationContext, let ctx = LocationContext(rawValue: raw) {
-                selectedContext = ctx
+            if let raw = habit.reminderWindow {
+                selectedWindow = HabitReminderWindow(rawValue: raw)
             } else {
-                selectedContext = .unknown
+                selectedWindow = nil
             }
         }
+    }
+}
+
+private struct TimeReminderOptionButton: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 10, weight: .semibold))
+                Text(title)
+                    .font(.caption2.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 46)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isSelected ? CleanShotTheme.accent : isHovered ? .primary : .secondary)
+        .cleanShotSurface(
+            shape: RoundedRectangle(cornerRadius: 8, style: .continuous),
+            level: .control,
+            isActive: isSelected || isHovered
+        )
+        .onHover { isHovered = $0 }
     }
 }

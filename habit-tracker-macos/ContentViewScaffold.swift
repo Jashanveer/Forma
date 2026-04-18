@@ -7,7 +7,6 @@ struct ContentViewScaffold: View {
     @Binding var newHabitTitle: String
     let metrics: HabitMetrics
     @ObservedObject var backend: HabitBackendStore
-    @ObservedObject var locationManager: LocationReminderManager
 
     @Binding var progressOpen: Bool
     @Binding var calendarOpen: Bool
@@ -26,6 +25,7 @@ struct ContentViewScaffold: View {
     let onDeleteHabit: (Habit) -> Void
     let onSync: () -> Void
     let onFindMentor: () -> Void
+    let onReminderChange: (Habit, HabitReminderWindow?) -> Void
     let onCompleteOnboarding: ([String]) -> Void
 
     var body: some View {
@@ -94,9 +94,9 @@ struct ContentViewScaffold: View {
                         metrics: metrics,
                         backend: backend,
                         habits: habits,
-                        locationManager: locationManager,
                         onSync: onSync,
-                        onFindMentor: onFindMentor
+                        onFindMentor: onFindMentor,
+                        onReminderChange: onReminderChange
                     )
                     .frame(width: 330)
                     .padding(.leading, 22)

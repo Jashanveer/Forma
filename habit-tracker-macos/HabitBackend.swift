@@ -4,7 +4,15 @@ import Combine
 struct BackendHabit: Decodable, Identifiable {
     let id: Int64
     let title: String
+    let reminderWindow: String?
     let checksByDate: [String: Bool]
+
+    init(id: Int64, title: String, checksByDate: [String: Bool], reminderWindow: String? = nil) {
+        self.id = id
+        self.title = title
+        self.reminderWindow = reminderWindow
+        self.checksByDate = checksByDate
+    }
 
     var completedDayKeys: [String] {
         checksByDate.filter { $0.value }.map(\.key).sorted()
@@ -174,6 +182,7 @@ final class HabitBackendStore: ObservableObject {
     @Published private(set) var habitListRequestState:   RequestState<[BackendHabit]>           = .idle
     @Published private(set) var dashboardRequestState:   RequestState<AccountabilityDashboard>  = .idle
     @Published private(set) var createHabitRequestState: RequestState<BackendHabit>             = .idle
+    @Published private(set) var updateHabitRequestState: RequestState<BackendHabit>             = .idle
     @Published private(set) var checkUpdateRequestState: RequestState<Void>                    = .idle
     @Published private(set) var deleteHabitRequestState: RequestState<Void>                    = .idle
     @Published private(set) var mentorRequestState:      RequestState<Void>                    = .idle
@@ -343,10 +352,10 @@ final class HabitBackendStore: ObservableObject {
         }
     }
 
-    func createHabit(title: String) async throws -> BackendHabit {
+    func createHabit(title: String, reminderWindow: String? = nil) async throws -> BackendHabit {
         createHabitRequestState = .loading; refreshSyncingState()
         do {
-            let habit = try await habitRepository.createHabit(title: title)
+            let habit = try await habitRepository.createHabit(title: title, reminderWindow: reminderWindow)
             await syncSessionFromClient()
             await responseCache.invalidateHabits()   // force re-fetch on next list
             createHabitRequestState = .success(habit)
@@ -356,6 +365,28 @@ final class HabitBackendStore: ObservableObject {
         } catch {
             handleAuthenticatedRequestError(error)
             createHabitRequestState = .failure(error.localizedDescription)
+            refreshSyncingState()
+            throw error
+        }
+    }
+
+    func updateHabit(habitID: Int64, title: String, reminderWindow: String?) async throws -> BackendHabit {
+        updateHabitRequestState = .loading; refreshSyncingState()
+        do {
+            let habit = try await habitRepository.updateHabit(
+                habitID: habitID,
+                title: title,
+                reminderWindow: reminderWindow
+            )
+            await syncSessionFromClient()
+            await responseCache.invalidateHabits()
+            updateHabitRequestState = .success(habit)
+            errorMessage = nil
+            refreshSyncingState()
+            return habit
+        } catch {
+            handleAuthenticatedRequestError(error)
+            updateHabitRequestState = .failure(error.localizedDescription)
             refreshSyncingState()
             throw error
         }
@@ -672,6 +703,7 @@ final class HabitBackendStore: ObservableObject {
             || habitListRequestState.isLoading
             || dashboardRequestState.isLoading
             || createHabitRequestState.isLoading
+            || updateHabitRequestState.isLoading
             || checkUpdateRequestState.isLoading
             || deleteHabitRequestState.isLoading
             || mentorRequestState.isLoading
@@ -702,7 +734,7 @@ final class HabitBackendStore: ObservableObject {
         Self.saveSession(nil, key: sessionKey)
         UserDefaults.standard.removeObject(forKey: "habitTracker.localhost.token")
         authRequestState = .idle; habitListRequestState = .idle; dashboardRequestState = .idle
-        createHabitRequestState = .idle; checkUpdateRequestState = .idle
+        createHabitRequestState = .idle; updateHabitRequestState = .idle; checkUpdateRequestState = .idle
         deleteHabitRequestState = .idle; mentorRequestState = .idle
         messageRequestState = .idle; friendRequestState = .idle
         streakFreezeRequestState = .idle
