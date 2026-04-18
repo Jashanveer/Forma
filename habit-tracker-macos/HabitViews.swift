@@ -281,6 +281,7 @@ struct HabitCard: View {
 
     @State private var isHovered = false
     @State private var showArchiveConfirm = false
+    @State private var showDeleteConfirm = false
 
     private var doneToday: Bool { habit.completedDayKeys.contains(todayKey) }
     private var isHabitEntry: Bool { habit.entryType == .habit }
@@ -357,6 +358,21 @@ struct HabitCard: View {
             Spacer(minLength: 4)
 
             SyncStatusBadge(status: habit.syncStatus)
+
+            if !isHabitEntry {
+                Button {
+                    showDeleteConfirm = true
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 22, height: 22)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Delete task")
+                .help("Delete task")
+            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
@@ -372,10 +388,18 @@ struct HabitCard: View {
         .onHover { isHovered = $0 }
         .modifier(MatchedStampFrame(id: habit.persistentModelID, namespace: stampNamespace))
         .contextMenu {
-            Button(role: .destructive) {
-                showArchiveConfirm = true
-            } label: {
-                Label("Archive \(habit.entryType.title.lowercased())", systemImage: "archivebox")
+            if isHabitEntry {
+                Button(role: .destructive) {
+                    showArchiveConfirm = true
+                } label: {
+                    Label("Archive habit", systemImage: "archivebox")
+                }
+            } else {
+                Button(role: .destructive) {
+                    showDeleteConfirm = true
+                } label: {
+                    Label("Delete task", systemImage: "xmark")
+                }
             }
         }
         .confirmationDialog(
@@ -391,6 +415,20 @@ struct HabitCard: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Your history will be preserved. Archived items can't be restored.")
+        }
+        .confirmationDialog(
+            "Delete \"\(habit.title)\"?",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Task", role: .destructive) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    onDelete(habit)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This task will be removed from your list.")
         }
     }
 }

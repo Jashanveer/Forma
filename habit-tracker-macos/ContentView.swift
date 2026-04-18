@@ -399,9 +399,14 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Archive habit (soft delete — preserves history locally)
+    // MARK: - Archive habits / delete tasks
 
     private func archiveHabit(_ habit: Habit) {
+        if habit.entryType == .task {
+            deleteTask(habit)
+            return
+        }
+
         let backendId = habit.backendId
         withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
             habit.isArchived = true
@@ -422,6 +427,28 @@ struct ContentView: View {
             } catch {
                 backend.errorMessage = error.localizedDescription
             }
+        }
+    }
+
+    private func deleteTask(_ task: Habit) {
+        let backendId = task.backendId
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            modelContext.delete(task)
+        }
+
+        guard let backendId, backend.isAuthenticated else {
+            refreshTimeReminders()
+            return
+        }
+
+        Task {
+            do {
+                try await backend.deleteTask(taskID: backendId)
+                await backend.refreshDashboard()
+            } catch {
+                backend.errorMessage = error.localizedDescription
+            }
+            refreshTimeReminders()
         }
     }
 
