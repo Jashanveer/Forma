@@ -201,6 +201,23 @@ final class HabitBackendStore: ObservableObject {
 
     var isAuthenticated: Bool { token != nil }
 
+    /// Stable per-user identifier decoded from the JWT `sub` or `userId` claim.
+    var currentUserId: String? {
+        guard let t = token else { return nil }
+        let parts = t.split(separator: ".")
+        guard parts.count == 3 else { return nil }
+        var payload = String(parts[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        while payload.count % 4 != 0 { payload += "=" }
+        guard let data = Data(base64Encoded: payload),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+        if let sub = obj["sub"] as? String { return sub }
+        if let uid = obj["userId"] as? Int { return String(uid) }
+        return nil
+    }
+
     init() {
         let session = Self.loadSession(from: "habitTracker.localhost.session.v1")
         token = session?.accessToken
@@ -282,10 +299,23 @@ final class HabitBackendStore: ObservableObject {
         stopStream()
         clearSession()
         Task {
-            await apiClient.logout()     // invalidate refresh token server-side
+            await apiClient.logout()
             await apiClient.clearSession()
         }
     }
+
+    func deleteAccount() async {
+        do {
+            let _: EmptyResponse = try await apiClient.authorizedRequest(
+                path: "/api/users/me", method: "DELETE"
+            )
+        } catch {
+            // Best-effort — clear locally even if network fails
+        }
+        signOut()
+    }
+
+    private struct EmptyResponse: Decodable {}
 
     // MARK: - Habits (cache-aware)
 

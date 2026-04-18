@@ -19,16 +19,24 @@ struct ContentViewScaffold: View {
     let showMenteeCharacter: Bool
     let mentorMissedCount: Int
 
+    let showOnboarding: Bool
+
     let onAddHabit: () -> Void
     let onToggleHabit: (Habit) -> Void
     let onDeleteHabit: (Habit) -> Void
     let onSync: () -> Void
     let onFindMentor: () -> Void
+    let onCompleteOnboarding: ([String]) -> Void
 
     var body: some View {
         ZStack {
             MinimalBackground()
                 .zIndex(-1)
+
+            DoneHabitPillsBackground(
+                habits: habits.filter { $0.completedDayKeys.contains(todayKey) }
+            )
+            .zIndex(0)
 
             CenterPanel(
                 habits: habits,
@@ -187,6 +195,13 @@ struct ContentViewScaffold: View {
             ConnectionStatusPill(backend: backend, onSync: onSync)
                 .padding(.top, 12)
                 .padding(.trailing, 16)
+        }
+        .overlay {
+            if showOnboarding {
+                OnboardingView(onComplete: onCompleteOnboarding)
+                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                    .zIndex(190)
+            }
         }
         .overlay {
             if !backend.isAuthenticated {

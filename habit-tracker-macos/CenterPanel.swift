@@ -15,18 +15,20 @@ struct CenterPanel: View {
     @State private var aiGreeting: String?
     @State private var hasRequestedGreeting = false
 
+    private var pendingHabits: [Habit] {
+        habits.filter { !$0.completedDayKeys.contains(todayKey) }
+    }
     private var isEmpty: Bool { habits.isEmpty }
+    private var allDoneToday: Bool { !habits.isEmpty && pendingHabits.isEmpty }
+    private var isCompact: Bool { !isEmpty && !allDoneToday }
 
     var body: some View {
-        VStack(spacing: isEmpty ? 16 : 10) {
-            if isEmpty {
+        VStack(spacing: isCompact ? 10 : 16) {
+            if !isCompact {
                 Spacer()
             }
 
-            TodayHeader(
-                greeting: displayGreeting,
-                isCompact: !isEmpty
-            )
+            TodayHeader(greeting: displayGreeting, isCompact: isCompact)
 
             AddHabitBar(newHabitTitle: $newHabitTitle, onAddHabit: onAddHabit)
                 .frame(maxWidth: 520)
@@ -37,10 +39,21 @@ struct CenterPanel: View {
                     .foregroundStyle(.tertiary)
                     .padding(.top, 4)
                 Spacer()
+            } else if allDoneToday {
+                VStack(spacing: 8) {
+                    Text("All done for today")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    Text("Your habits are drifting in the background.\nSee you tomorrow.")
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 8)
+                Spacer()
             } else {
                 ScrollView {
                     HabitListSection(
-                        habits: habits,
+                        habits: pendingHabits,
                         todayKey: todayKey,
                         onToggle: onToggleHabit,
                         onDelete: onDeleteHabit,
@@ -53,12 +66,13 @@ struct CenterPanel: View {
                 .frame(maxWidth: 680)
             }
         }
-        .padding(.top, isEmpty ? 0 : 16)
+        .padding(.top, isCompact ? 16 : 0)
         .padding(.bottom, 8)
         .frame(maxWidth: 860, maxHeight: .infinity)
         .padding(.horizontal, 34)
         .padding(.vertical, 28)
         .animation(.spring(response: 0.5, dampingFraction: 0.82), value: isEmpty)
+        .animation(.spring(response: 0.5, dampingFraction: 0.82), value: allDoneToday)
         .animation(.smooth(duration: 0.2), value: metrics.doneToday)
         .onAppear {
             guard !hasRequestedGreeting else { return }

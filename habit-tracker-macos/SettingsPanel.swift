@@ -8,6 +8,8 @@ struct SettingsPanel: View {
     let onSync: () -> Void
     let onFindMentor: () -> Void
 
+    @State private var showDeleteConfirm = false
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -29,7 +31,7 @@ struct SettingsPanel: View {
                     Spacer()
                 }
 
-                BackendConnectionCard(backend: backend, onSync: onSync)
+                AccountActionsCard(backend: backend, onSync: onSync, showDeleteConfirm: $showDeleteConfirm)
 
                 MentorActionCard(metrics: metrics, dashboard: backend.dashboard, onFindMentor: onFindMentor)
 
@@ -53,40 +55,60 @@ struct SettingsPanel: View {
             level: .elevated,
             shadowRadius: 18
         )
+        .confirmationDialog(
+            "Delete account?",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Delete my account", role: .destructive) {
+                Task { await backend.deleteAccount() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes your account, all habits, and streak history. This cannot be undone.")
+        }
     }
 }
 
-struct BackendConnectionCard: View {
+struct AccountActionsCard: View {
     @ObservedObject var backend: HabitBackendStore
     let onSync: () -> Void
+    @Binding var showDeleteConfirm: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            PanelTitle(systemImage: "server.rack", title: "Backend")
+            PanelTitle(systemImage: "person.crop.circle", title: "Account")
 
-            SettingsRow(
-                systemImage: backend.errorMessage == nil ? "checkmark.icloud" : "exclamationmark.triangle",
-                title: BackendEnvironment.displayHost,
-                value: backend.isAuthenticated ? "Connected" : "Signed out"
-            )
-
-            if let statusMessage = backend.statusMessage, backend.errorMessage == nil {
-                Text(statusMessage)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let errorMessage = backend.errorMessage {
-                Text(errorMessage)
+            if let error = backend.errorMessage {
+                Text(error)
                     .font(.caption)
                     .foregroundStyle(.red)
                     .fixedSize(horizontal: false, vertical: true)
+            } else if let status = backend.statusMessage {
+                Text(status)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             HStack(spacing: 8) {
                 SoftActionButton(title: "Sync", systemImage: "arrow.clockwise", action: onSync)
                 SoftActionButton(title: "Sign out", systemImage: "rectangle.portrait.and.arrow.right", action: backend.signOut)
             }
+
+            Button {
+                showDeleteConfirm = true
+            } label: {
+                Label("Delete account", systemImage: "trash")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
+            .cleanShotSurface(
+                shape: RoundedRectangle(cornerRadius: 10, style: .continuous),
+                level: .control
+            )
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)

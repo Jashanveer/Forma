@@ -4,17 +4,24 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Habit.createdAt) private var habits: [Habit]
+    @Query(filter: #Predicate<Habit> { !$0.isArchived }, sort: \Habit.createdAt) private var habits: [Habit]
     @StateObject private var backend = HabitBackendStore()
     @StateObject private var locationManager = LocationReminderManager()
     private let locationNotifier = LocationReminderNotifier()
 
+    @State private var hasCompletedOnboarding = false
     @State private var newHabitTitle = ""
     @State private var progressOpen = false
     @State private var calendarOpen = false
     @State private var settingsOpen = false
     @State private var showCelebration = false
     @State private var mentorNudge: String? = nil
+
+    private var showOnboarding: Bool { backend.isAuthenticated && !hasCompletedOnboarding }
+
+    private var onboardingKey: String {
+        "onboarded_\(backend.currentUserId ?? "anon")"
+    }
 
     private static let nudgeMessages = [
         "Well done! 💪", "Keep it up!", "That's the way!", "Proud of you!",
@@ -54,14 +61,26 @@ struct ContentView: View {
             showMentorCharacter: showMentorCharacter,
             showMenteeCharacter: showMenteeCharacter,
             mentorMissedCount: mentorMissedCount,
+            showOnboarding: showOnboarding,
             onAddHabit: addHabit,
             onToggleHabit: toggleHabit,
-            onDeleteHabit: deleteHabit,
+            onDeleteHabit: archiveHabit,
             onSync: syncWithBackend,
-            onFindMentor: assignMentor
+            onFindMentor: assignMentor,
+            onCompleteOnboarding: completeOnboarding
         )
         .onChange(of: locationManager.currentContext) { _, newContext in
             locationNotifier.contextDidChange(to: newContext, habits: habits, todayKey: todayKey)
+        }
+        .onChange(of: backend.isAuthenticated) { _, isAuth in
+            hasCompletedOnboarding = isAuth
+                ? UserDefaults.standard.bool(forKey: onboardingKey)
+                : false
+        }
+        .onAppear {
+            if backend.isAuthenticated {
+                hasCompletedOnboarding = UserDefaults.standard.bool(forKey: onboardingKey)
+            }
         }
         .animation(.smooth(duration: 0.2), value: colorScheme)
         .task {
@@ -258,17 +277,14 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Delete habit
+    // MARK: - Archive habit (soft delete — preserves history locally)
 
-    private func deleteHabit(_ habit: Habit) {
+    private func archiveHabit(_ habit: Habit) {
         let backendId = habit.backendId
-
-        // Mark for deletion first; actual SwiftData removal happens after server confirms
-        if backendId != nil && backend.isAuthenticated {
-            habit.syncStatus = .deleted
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            habit.isArchived = true
+            habit.updatedAt = Date()
         }
-
-        withAnimation { modelContext.delete(habit) }
 
         guard let backendId, backend.isAuthenticated else { return }
         Task {
@@ -279,6 +295,20 @@ struct ContentView: View {
                 backend.errorMessage = error.localizedDescription
             }
         }
+    }
+
+    // MARK: - Onboarding
+
+    private func completeOnboarding(_ habitTitles: [String]) {
+        for title in habitTitles {
+            let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { continue }
+            let habit = Habit(title: trimmed, syncStatus: .pending)
+            modelContext.insert(habit)
+        }
+        UserDefaults.standard.set(true, forKey: onboardingKey)
+        hasCompletedOnboarding = true
+        if !habitTitles.isEmpty { syncWithBackend() }
     }
 
     // MARK: - Helpers
@@ -293,6 +323,7 @@ struct ContentView: View {
     private func assignMentor() {
         Task { await backend.assignMentor() }
     }
+
 }
 
 #Preview("Light") {

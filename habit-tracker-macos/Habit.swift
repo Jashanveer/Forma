@@ -40,6 +40,10 @@ final class Habit {
     /// Optional so SwiftData can add this field without a migration.
     var locationContext: String?
 
+    /// When true the habit is hidden from the dashboard and removed from sync.
+    /// History is preserved locally so streaks remain intact.
+    var isArchived: Bool
+
     init(
         title: String,
         createdAt: Date = Date(),
@@ -48,7 +52,8 @@ final class Habit {
         updatedAt: Date = Date(),
         syncStatus: SyncStatus = .pending,
         pendingCheckDayKey: String? = nil,
-        pendingCheckIsDone: Bool = false
+        pendingCheckIsDone: Bool = false,
+        isArchived: Bool = false
     ) {
         self.title = title
         self.createdAt = createdAt
@@ -58,5 +63,6 @@ final class Habit {
         self.syncStatus = syncStatus
         self.pendingCheckDayKey = pendingCheckDayKey
         self.pendingCheckIsDone = pendingCheckIsDone
+        self.isArchived = isArchived
     }
 }
