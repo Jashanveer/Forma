@@ -118,7 +118,7 @@ struct ContentView: View {
 
     // MARK: - Add habit
 
-    private func addHabit(_ entryType: HabitEntryType) {
+    private func addHabit(_ entryType: HabitEntryType, dueAt: Date? = nil) {
         let title = newHabitTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return }
 
@@ -128,7 +128,12 @@ struct ContentView: View {
         }
 
         // Optimistic local insert with .pending status
-        let localHabit = Habit(title: title, entryType: entryType, syncStatus: .pending)
+        let localHabit = Habit(
+            title: title,
+            entryType: entryType,
+            syncStatus: .pending,
+            dueAt: entryType == .task ? dueAt : nil
+        )
         withAnimation { modelContext.insert(localHabit) }
         newHabitTitle = ""
         saveAndRefreshWidgets()
@@ -332,9 +337,19 @@ struct ContentView: View {
     // MARK: - Toggle habit
 
     private func toggleHabit(_ habit: Habit) {
+        // Tasks stay completed once checked — clicking a done task is a no-op.
+        if habit.entryType == .task && habit.isTaskCompleted { return }
+
         var keys = habit.completedDayKeys
-        let wasUnchecked = !keys.contains(todayKey)
-        if let i = keys.firstIndex(of: todayKey) { keys.remove(at: i) } else { keys.append(todayKey) }
+        let wasUnchecked: Bool
+        if habit.entryType == .task {
+            // Tasks: mark as completed for today (single key marking permanent completion).
+            wasUnchecked = true
+            keys = [todayKey]
+        } else {
+            wasUnchecked = !keys.contains(todayKey)
+            if let i = keys.firstIndex(of: todayKey) { keys.remove(at: i) } else { keys.append(todayKey) }
+        }
 
         let habitID = habit.persistentModelID
 

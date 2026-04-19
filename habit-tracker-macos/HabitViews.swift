@@ -21,10 +21,12 @@ struct TodayHeader: View {
 struct AddHabitBar: View {
     @Binding var newHabitTitle: String
     @Binding var selectedType: HabitEntryType
-    let onAddHabit: (HabitEntryType) -> Void
+    let onAddHabit: (HabitEntryType, Date?) -> Void
 
     @State private var isHovered = false
     @State private var showValidationError = false
+    @State private var dueAt: Date? = nil
+    @State private var showDuePicker = false
     @FocusState private var fieldFocused: Bool
 
     var body: some View {
@@ -37,6 +39,10 @@ struct AddHabitBar: View {
                     .focused($fieldFocused)
                     .onChange(of: newHabitTitle) { _, _ in showValidationError = false }
                     .onSubmit(attemptAdd)
+
+                if selectedType == .task {
+                    DueDateControl(dueAt: $dueAt, isPresented: $showDuePicker)
+                }
 
                 HabitEntryTypeToggle(selection: $selectedType)
 
@@ -84,7 +90,9 @@ struct AddHabitBar: View {
             return
         }
         showValidationError = false
-        onAddHabit(selectedType)
+        let due = selectedType == .task ? dueAt : nil
+        onAddHabit(selectedType, due)
+        dueAt = nil
     }
 
     private func isLikelyMeaningful(_ text: String) -> Bool {
@@ -164,6 +172,481 @@ private struct HabitEntryTypeToggle: View {
             return CleanShotTheme.accent
         case .habit:
             return CleanShotTheme.success
+        }
+    }
+}
+
+private struct DueDateControl: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Binding var dueAt: Date?
+    @Binding var isPresented: Bool
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button {
+            isPresented = true
+        } label: {
+            trigger
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .help(dueAt == nil ? "Set a due date (optional)" : "Change due date")
+        .popover(isPresented: $isPresented, arrowEdge: .bottom) {
+            DueDatePopover(
+                dueAt: $dueAt,
+                isPresented: $isPresented
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var trigger: some View {
+        if let dueAt {
+            HStack(spacing: 5) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 10, weight: .bold))
+                Text(DueDateFormat.relative(dueAt))
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundStyle(CleanShotTheme.accent)
+            .padding(.horizontal, 9)
+            .frame(height: 24)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.18 : 0.12))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(CleanShotTheme.accent.opacity(0.28), lineWidth: 0.5)
+            )
+            .transition(.scale(scale: 0.85).combined(with: .opacity))
+        } else {
+            Image(systemName: "calendar.badge.plus")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(isHovered ? .primary : .secondary)
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
+        }
+    }
+}
+
+private struct DueDatePopover: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Binding var dueAt: Date?
+    @Binding var isPresented: Bool
+
+    @State private var draft: Date
+    @State private var showsCustomCalendar = false
+
+    init(dueAt: Binding<Date?>, isPresented: Binding<Bool>) {
+        self._dueAt = dueAt
+        self._isPresented = isPresented
+        let seed = dueAt.wrappedValue
+            ?? Calendar.current.startOfDay(for: Date())
+        self._draft = State(initialValue: seed)
+    }
+
+    private var presets: [DueDatePreset] { DueDatePreset.defaults }
+    private var activePreset: DueDatePreset? {
+        presets.first { Calendar.current.isDate($0.date, inSameDayAs: draft) }
+    }
+    private var selectedDateText: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        return formatter.string(from: draft)
+    }
+    private var isOtherSelected: Bool { activePreset == nil }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Due Date")
+                    .font(.system(size: 10.5, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .kerning(0.65)
+
+                Text(selectedDateText)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 14)
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                ForEach(presets) { preset in
+                    presetButton(preset)
+                }
+                otherButton
+            }
+            .padding(.horizontal, 12)
+
+            if showsCustomCalendar {
+                DueDateCalendarGrid(draft: $draft)
+                    .padding(.horizontal, 12)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            HStack {
+                if dueAt != nil {
+                    Button {
+                        withAnimation(.smooth(duration: 0.15)) {
+                            dueAt = nil
+                        }
+                        isPresented = false
+                    } label: {
+                        Text("Clear")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(CleanShotTheme.danger)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Spacer()
+
+                Button {
+                    isPresented = false
+                } label: {
+                    Text("Cancel")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 12)
+                        .frame(height: 28)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(CleanShotTheme.controlFill(for: colorScheme))
+                        )
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    dueAt = Calendar.current.startOfDay(for: draft)
+                    isPresented = false
+                } label: {
+                    Text("Done")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 14)
+                        .frame(height: 28)
+                        .background(Capsule(style: .continuous).fill(CleanShotTheme.accent))
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+        }
+        .frame(width: 328)
+        .padding(.top, 2)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(CleanShotTheme.stroke(for: colorScheme), lineWidth: 1)
+        )
+        .animation(.smooth(duration: 0.18), value: showsCustomCalendar)
+    }
+
+    private func presetButton(_ preset: DueDatePreset) -> some View {
+        let isActive = activePreset?.id == preset.id
+        return Button {
+            withAnimation(.smooth(duration: 0.15)) {
+                draft = preset.date
+                showsCustomCalendar = false
+            }
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: preset.icon)
+                    .font(.system(size: 10, weight: .semibold))
+                Text(preset.label)
+                    .font(.system(size: 12, weight: .medium))
+                Spacer(minLength: 0)
+                Text(preset.shortDate)
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+            .foregroundStyle(isActive ? CleanShotTheme.accent : .primary)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(
+                        isActive
+                            ? CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.18 : 0.12)
+                            : CleanShotTheme.controlFill(for: colorScheme)
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(
+                        isActive ? CleanShotTheme.accent.opacity(0.30) : Color.clear,
+                        lineWidth: 0.75
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var otherButton: some View {
+        Button {
+            withAnimation(.smooth(duration: 0.18)) {
+                showsCustomCalendar = true
+            }
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 10, weight: .semibold))
+                Text("Other")
+                    .font(.system(size: 12, weight: .medium))
+                Spacer(minLength: 0)
+                if isOtherSelected {
+                    Text("Custom")
+                        .font(.system(size: 10.5, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .foregroundStyle(isOtherSelected || showsCustomCalendar ? CleanShotTheme.accent : .primary)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(
+                        (isOtherSelected || showsCustomCalendar)
+                            ? CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.18 : 0.12)
+                            : CleanShotTheme.controlFill(for: colorScheme)
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(
+                        (isOtherSelected || showsCustomCalendar) ? CleanShotTheme.accent.opacity(0.30) : Color.clear,
+                        lineWidth: 0.75
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct DueDateCalendarGrid: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Binding var draft: Date
+    @State private var visibleMonth: Date
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 3), count: 7)
+
+    init(draft: Binding<Date>) {
+        self._draft = draft
+        self._visibleMonth = State(initialValue: Self.startOfMonth(for: draft.wrappedValue))
+    }
+
+    private var calendar: Calendar { Calendar.current }
+
+    private var monthTitle: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: visibleMonth)
+    }
+
+    private var weekdaySymbols: [String] {
+        let symbols = DateFormatter().veryShortStandaloneWeekdaySymbols ?? ["S", "M", "T", "W", "T", "F", "S"]
+        let firstIndex = max(0, calendar.firstWeekday - 1)
+        return Array(symbols[firstIndex..<symbols.count]) + Array(symbols[0..<firstIndex])
+    }
+
+    private var monthDays: [Date?] {
+        guard let range = calendar.range(of: .day, in: .month, for: visibleMonth) else {
+            return []
+        }
+
+        let firstWeekday = calendar.component(.weekday, from: visibleMonth)
+        let leadingEmptyDays = (firstWeekday - calendar.firstWeekday + 7) % 7
+        var days = Array<Date?>(repeating: nil, count: leadingEmptyDays)
+
+        for day in range {
+            var components = calendar.dateComponents([.year, .month], from: visibleMonth)
+            components.day = day
+            days.append(calendar.date(from: components).map { calendar.startOfDay(for: $0) })
+        }
+
+        while days.count % 7 != 0 {
+            days.append(nil)
+        }
+
+        return days
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack {
+                monthButton(systemImage: "chevron.left") {
+                    moveMonth(by: -1)
+                }
+
+                Spacer()
+
+                Text(monthTitle)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                monthButton(systemImage: "chevron.right") {
+                    moveMonth(by: 1)
+                }
+            }
+
+            LazyVGrid(columns: columns, spacing: 3) {
+                ForEach(weekdaySymbols, id: \.self) { symbol in
+                    Text(symbol)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, minHeight: 18)
+                }
+
+                ForEach(Array(monthDays.enumerated()), id: \.offset) { _, date in
+                    if let date {
+                        dayButton(for: date)
+                    } else {
+                        Color.clear
+                            .frame(maxWidth: .infinity, minHeight: 30)
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(CleanShotTheme.controlFill(for: colorScheme))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(CleanShotTheme.stroke(for: colorScheme), lineWidth: 0.75)
+        )
+        .onChange(of: draft) { _, newValue in
+            let month = Self.startOfMonth(for: newValue)
+            if !calendar.isDate(month, equalTo: visibleMonth, toGranularity: .month) {
+                visibleMonth = month
+            }
+        }
+    }
+
+    private func monthButton(systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.secondary)
+                .frame(width: 24, height: 24)
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(CleanShotTheme.controlFill(for: colorScheme))
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func dayButton(for date: Date) -> some View {
+        let isSelected = calendar.isDate(date, inSameDayAs: draft)
+        let isToday = calendar.isDateInToday(date)
+
+        return Button {
+            withAnimation(.smooth(duration: 0.12)) {
+                draft = calendar.startOfDay(for: date)
+            }
+        } label: {
+            Text("\(calendar.component(.day, from: date))")
+                .font(.system(size: 11.5, weight: isSelected ? .semibold : .medium))
+                .monospacedDigit()
+                .foregroundStyle(dayForeground(isSelected: isSelected, isToday: isToday))
+                .frame(maxWidth: .infinity, minHeight: 30)
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(isSelected ? CleanShotTheme.accent : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .stroke(isToday && !isSelected ? CleanShotTheme.accent.opacity(0.55) : Color.clear, lineWidth: 0.75)
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func dayForeground(isSelected: Bool, isToday: Bool) -> Color {
+        if isSelected { return .white }
+        if isToday { return CleanShotTheme.accent }
+        return .primary
+    }
+
+    private func moveMonth(by amount: Int) {
+        withAnimation(.smooth(duration: 0.14)) {
+            visibleMonth = calendar.date(byAdding: .month, value: amount, to: visibleMonth) ?? visibleMonth
+        }
+    }
+
+    private static func startOfMonth(for date: Date) -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month], from: date)
+        return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+    }
+}
+
+private struct DueDatePreset: Identifiable {
+    let id: String
+    let label: String
+    let icon: String
+    let date: Date
+
+    var shortDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE"
+        return formatter.string(from: date)
+    }
+
+    static var defaults: [DueDatePreset] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let tomorrow = cal.date(byAdding: .day, value: 1, to: today) ?? today
+
+        // Next Saturday (weekend)
+        let weekday = cal.component(.weekday, from: today)
+        let daysToSaturday = (7 - weekday) % 7 // Sat = 7
+        let saturdayOffset = daysToSaturday == 0 ? 7 : daysToSaturday
+        let weekend = cal.date(byAdding: .day, value: saturdayOffset, to: today) ?? today
+
+        let nextWeek = cal.date(byAdding: .day, value: 7, to: today) ?? today
+
+        return [
+            .init(id: "today", label: "Today", icon: "sun.max.fill", date: today),
+            .init(id: "tomorrow", label: "Tomorrow", icon: "sunrise.fill", date: tomorrow),
+            .init(id: "weekend", label: "Weekend", icon: "sparkles", date: weekend),
+            .init(id: "nextweek", label: "Next week", icon: "arrow.forward.circle.fill", date: nextWeek)
+        ]
+    }
+}
+
+enum DueDateFormat {
+    static func relative(_ date: Date) -> String {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let target = cal.startOfDay(for: date)
+        let days = cal.dateComponents([.day], from: today, to: target).day ?? 0
+
+        switch days {
+        case 0: return "Today"
+        case 1: return "Tomorrow"
+        case -1: return "Yesterday"
+        case 2...6:
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEEE"
+            return formatter.string(from: date)
+        default:
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
         }
     }
 }
@@ -283,21 +766,33 @@ struct HabitCard: View {
     @State private var showArchiveConfirm = false
     @State private var showDeleteConfirm = false
 
-    private var doneToday: Bool { habit.completedDayKeys.contains(todayKey) }
+    private var doneToday: Bool {
+        switch habit.entryType {
+        case .habit: return habit.completedDayKeys.contains(todayKey)
+        case .task:  return habit.isTaskCompleted
+        }
+    }
     private var isHabitEntry: Bool { habit.entryType == .habit }
+    private var isOverdue: Bool { habit.isOverdue() }
     private var currentStreak: Int { HabitMetrics.currentStreak(for: habit.completedDayKeys, endingAt: todayKey) }
     private var bestStreak: Int { HabitMetrics.bestStreak(for: habit.completedDayKeys) }
     private var recentDays: [DayInfo] { DateKey.recentDays(count: 7) }
     private var completionTint: Color {
-        isHabitEntry ? CleanShotTheme.success : CleanShotTheme.accent
+        if isHabitEntry { return CleanShotTheme.success }
+        return isOverdue ? CleanShotTheme.danger : CleanShotTheme.accent
     }
     private var cardTint: Color {
+        let opacity = colorScheme == .dark ? 0.10 : 0.07
         switch habit.entryType {
         case .task:
-            return CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.10 : 0.07)
+            return (isOverdue ? CleanShotTheme.danger : CleanShotTheme.accent).opacity(opacity)
         case .habit:
-            return CleanShotTheme.success.opacity(colorScheme == .dark ? 0.10 : 0.07)
+            return CleanShotTheme.success.opacity(opacity)
         }
+    }
+    private var dueDateText: String? {
+        guard habit.entryType == .task, let due = habit.dueAt else { return nil }
+        return DueDateFormat.relative(due)
     }
 
     var body: some View {
@@ -337,8 +832,13 @@ struct HabitCard: View {
                                 .foregroundStyle(CleanShotTheme.gold)
                         }
                     } else {
-                        Label("Task", systemImage: "checklist")
-                            .foregroundStyle(.secondary)
+                        if let dueDateText {
+                            Label(dueDateText, systemImage: "calendar")
+                                .foregroundStyle(isOverdue ? CleanShotTheme.danger : .secondary)
+                        } else {
+                            Label("Task", systemImage: "checklist")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     HStack(spacing: 3) {
                         ForEach(recentDays) { day in

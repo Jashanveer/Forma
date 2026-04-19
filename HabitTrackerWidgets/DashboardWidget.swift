@@ -43,7 +43,7 @@ private struct DashboardView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Habit Tracker")
+                    Text("Forma")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(.primary)
                     Text(dateLabel)

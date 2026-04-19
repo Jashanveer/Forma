@@ -66,6 +66,9 @@ final class Habit {
     /// Raw value of `HabitReminderWindow`; nil means no time-window reminder.
     var reminderWindow: String?
 
+    /// Optional due date for task-type entries. Nil for habits or undated tasks.
+    var dueAt: Date?
+
     /// When true the habit is hidden from the dashboard and removed from sync.
     /// History is preserved locally so streaks remain intact.
     var isArchived: Bool
@@ -92,6 +95,7 @@ final class Habit {
         pendingCheckDayKey: String? = nil,
         pendingCheckIsDone: Bool = false,
         reminderWindow: String? = nil,
+        dueAt: Date? = nil,
         isArchived: Bool = false
     ) {
         self.title = title
@@ -104,6 +108,20 @@ final class Habit {
         self.pendingCheckDayKey = pendingCheckDayKey
         self.pendingCheckIsDone = pendingCheckIsDone
         self.reminderWindow = reminderWindow
+        self.dueAt = dueAt
         self.isArchived = isArchived
+    }
+
+    // MARK: - Convenience
+
+    /// Tasks stay completed once any day key is recorded; habits are per-day.
+    var isTaskCompleted: Bool {
+        entryType == .task && !completedDayKeys.isEmpty
+    }
+
+    /// Task is past its due date (and not yet done). Habits ignore this.
+    func isOverdue(now: Date = Date()) -> Bool {
+        guard entryType == .task, !isTaskCompleted, let due = dueAt else { return false }
+        return due < now
     }
 }

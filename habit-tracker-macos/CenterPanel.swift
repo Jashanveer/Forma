@@ -12,7 +12,7 @@ struct CenterPanel: View {
     var clusters: [AccountabilityDashboard.HabitTimeCluster] = []
     let stampNamespace: Namespace.ID
     let stampStagingIds: Set<PersistentIdentifier>
-    let onAddHabit: (HabitEntryType) -> Void
+    let onAddHabit: (HabitEntryType, Date?) -> Void
     let onToggleHabit: (Habit) -> Void
     let onDeleteHabit: (Habit) -> Void
 
@@ -20,9 +20,14 @@ struct CenterPanel: View {
     @State private var hasRequestedGreeting = false
 
     private var pendingHabits: [Habit] {
-        habits.filter {
-            !$0.completedDayKeys.contains(todayKey)
-                || stampStagingIds.contains($0.persistentModelID)
+        habits.filter { habit in
+            let isDone: Bool = {
+                switch habit.entryType {
+                case .habit: return habit.completedDayKeys.contains(todayKey)
+                case .task:  return habit.isTaskCompleted
+                }
+            }()
+            return !isDone || stampStagingIds.contains(habit.persistentModelID)
         }
     }
     private var isEmpty: Bool { habits.isEmpty }

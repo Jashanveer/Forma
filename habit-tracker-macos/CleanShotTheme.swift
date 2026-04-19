@@ -4,6 +4,7 @@ enum CleanShotTheme {
     static let accent = Color(red: 0.18, green: 0.58, blue: 0.86)
     static let success = Color(red: 0.22, green: 0.68, blue: 0.36)
     static let warning = Color(red: 0.96, green: 0.61, blue: 0.18)
+    static let danger = Color(red: 0.90, green: 0.36, blue: 0.38)
     static let gold = Color(red: 0.94, green: 0.74, blue: 0.24)
     static let violet = Color(red: 0.46, green: 0.48, blue: 0.84)
 
