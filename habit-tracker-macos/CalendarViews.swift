@@ -181,6 +181,18 @@ struct MonthDots: View {
     private var days: [DayInfo] {
         DateKey.days(inMonth: month, year: year)
     }
+    private var leadingEmptyCells: Int {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // Monday
+        guard let firstDay = calendar.date(from: DateComponents(year: year, month: month, day: 1)) else {
+            return 0
+        }
+        let weekday = calendar.component(.weekday, from: firstDay)
+        return (weekday - calendar.firstWeekday + 7) % 7
+    }
+    private var dayCells: [DayInfo?] {
+        Array(repeating: nil, count: leadingEmptyCells) + days.map { Optional($0) }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
@@ -194,11 +206,16 @@ struct MonthDots: View {
                         .foregroundStyle(.secondary)
                 }
 
-                ForEach(days) { day in
-                    Circle()
-                        .fill(fillColor(for: day.key))
-                        .aspectRatio(1, contentMode: .fit)
-                        .help(helpText(for: day.key))
+                ForEach(Array(dayCells.enumerated()), id: \.offset) { _, day in
+                    if let day {
+                        Circle()
+                            .fill(fillColor(for: day.key))
+                            .aspectRatio(1, contentMode: .fit)
+                            .help(helpText(for: day.key))
+                    } else {
+                        Color.clear
+                            .aspectRatio(1, contentMode: .fit)
+                    }
                 }
             }
         }
