@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MentorChatBubble: View {
     let mentorName: String
+    var isAI: Bool = false
     let messages: [AccountabilityDashboard.Message]
     @Binding var messageText: String
     let onSend: () -> Void
@@ -17,9 +18,14 @@ struct MentorChatBubble: View {
                     .fill(.green)
                     .frame(width: 8, height: 8)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(mentorName)
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("Your mentor")
+                    HStack(spacing: 6) {
+                        Text(mentorName)
+                            .font(.system(size: 13, weight: .semibold))
+                        if isAI {
+                            MentorAIBadge()
+                        }
+                    }
+                    Text(isAI ? "AI mentor — until a human matches" : "Your mentor")
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                 }
@@ -110,5 +116,36 @@ struct MentorChatBubble: View {
         colorScheme == .dark
             ? Color(red: 0.09, green: 0.12, blue: 0.10)
             : Color.white
+    }
+}
+
+/// Subtle pill badge marking the mentor as AI. Tinted with the app accent so
+/// it reads as part of the chrome rather than a system warning.
+private struct MentorAIBadge: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 8, weight: .semibold))
+            Text("AI")
+                .font(.system(size: 9, weight: .semibold))
+                .tracking(0.4)
+        }
+        .foregroundStyle(CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.92 : 0.85))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(
+            Capsule(style: .continuous)
+                .fill(CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.16 : 0.10))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(
+                    CleanShotTheme.accent.opacity(colorScheme == .dark ? 0.32 : 0.22),
+                    lineWidth: 0.5
+                )
+        )
+        .accessibilityLabel("AI mentor")
     }
 }

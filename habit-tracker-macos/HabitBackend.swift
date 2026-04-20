@@ -92,6 +92,22 @@ struct AccountabilityDashboard: Decodable {
         let id: Int64; let status: String
         let mentor: UserSummary; let mentee: UserSummary
         let matchScore: Int; let reasons: [String]
+        let aiMentor: Bool
+
+        private enum CodingKeys: String, CodingKey {
+            case id, status, mentor, mentee, matchScore, reasons, aiMentor
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            id          = try c.decode(Int64.self,        forKey: .id)
+            status      = try c.decode(String.self,       forKey: .status)
+            mentor      = try c.decode(UserSummary.self,  forKey: .mentor)
+            mentee      = try c.decode(UserSummary.self,  forKey: .mentee)
+            matchScore  = try c.decode(Int.self,          forKey: .matchScore)
+            reasons     = try c.decode([String].self,     forKey: .reasons)
+            aiMentor    = try c.decodeIfPresent(Bool.self, forKey: .aiMentor) ?? false
+        }
     }
     struct UserSummary: Decodable {
         let userId: Int64; let displayName: String

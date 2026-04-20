@@ -78,6 +78,7 @@ struct MentorCharacterView: View {
 
                 MentorChatBubble(
                     mentorName: mentorName,
+                    isAI: backend.dashboard?.match?.aiMentor ?? false,
                     messages: messages,
                     messageText: $messageText,
                     onSend: sendMessage,
