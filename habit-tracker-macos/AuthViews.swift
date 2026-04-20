@@ -2,20 +2,8 @@ import SwiftUI
 
 // MARK: - App icon motion
 
-private struct AuthIconFramePreferenceKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        let next = nextValue()
-        if !next.isEmpty {
-            value = next
-        }
-    }
-}
-
 struct AuthExperienceOverlay: View {
     @ObservedObject var backend: HabitBackendStore
-    @Binding var isCompletingAuthentication: Bool
     let onAuthenticated: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
@@ -25,11 +13,9 @@ struct AuthExperienceOverlay: View {
     @State private var introIconVisible = false
     @State private var introProgress: CGFloat = 0
     @State private var introIsReady = false
-    @State private var portalProgress: CGFloat = 0
-    @State private var loginIconFrame: CGRect = .zero
 
     private var shouldShowOverlay: Bool {
-        !backend.isAuthenticated || isCompletingAuthentication
+        !backend.isAuthenticated
     }
 
     var body: some View {
@@ -38,9 +24,8 @@ struct AuthExperienceOverlay: View {
                 ZStack {
                     if showLogin {
                         AuthGateView(backend: backend, iconNamespace: iconNamespace) {
-                            completeAuthentication()
+                            onAuthenticated()
                         }
-                        .allowsHitTesting(!isCompletingAuthentication)
                         .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
 
@@ -53,18 +38,6 @@ struct AuthExperienceOverlay: View {
                         )
                         .transition(.opacity)
                     }
-
-                    if isCompletingAuthentication {
-                        IconDashboardPortalView(
-                            progress: portalProgress,
-                            sourceFrame: loginIconFrame
-                        )
-                            .transition(.opacity)
-                    }
-                }
-                .coordinateSpace(name: "authOverlaySpace")
-                .onPreferenceChange(AuthIconFramePreferenceKey.self) { frame in
-                    loginIconFrame = frame
                 }
                 .background {
                     CleanShotTheme.canvas(for: colorScheme)
@@ -74,8 +47,6 @@ struct AuthExperienceOverlay: View {
                 .task { await runIntroIfNeeded() }
                 .onChange(of: backend.isAuthenticated) { _, isAuthenticated in
                     guard !isAuthenticated else { return }
-                    isCompletingAuthentication = false
-                    portalProgress = 0
                     if hasRunIntro {
                         showLogin = true
                     }
@@ -118,29 +89,6 @@ struct AuthExperienceOverlay: View {
         try? await Task.sleep(nanoseconds: 260_000_000)
         withAnimation(.smooth(duration: 0.78)) {
             showLogin = true
-        }
-    }
-
-    private func completeAuthentication() {
-        guard !isCompletingAuthentication else { return }
-
-        isCompletingAuthentication = true
-        portalProgress = 0
-
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 70_000_000)
-            withAnimation(.smooth(duration: 1.58)) {
-                portalProgress = 1
-            }
-
-            try? await Task.sleep(nanoseconds: 1_240_000_000)
-            onAuthenticated()
-
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            withAnimation(.smooth(duration: 0.34)) {
-                isCompletingAuthentication = false
-                portalProgress = 0
-            }
         }
     }
 }
@@ -296,55 +244,6 @@ private struct CheckStroke: Shape {
             x: start.x + (end.x - start.x) * fraction,
             y: start.y + (end.y - start.y) * fraction
         )
-    }
-}
-
-private struct IconDashboardPortalView: View {
-    let progress: CGFloat
-    let sourceFrame: CGRect
-
-    var body: some View {
-        GeometryReader { geo in
-            let longestSide = max(geo.size.width, geo.size.height)
-            let iconSize = sourceFrame.isEmpty ? CGFloat(60) : max(sourceFrame.width, sourceFrame.height)
-            let sourceCenter = sourceFrame.isEmpty
-                ? CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-                : CGPoint(x: sourceFrame.midX, y: sourceFrame.midY)
-            let viewportCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-            let scale = 1 + easedProgress * (longestSide / iconSize * 4.15)
-            let blackPoint = CGPoint(x: iconSize * 0.23, y: iconSize * 0.29)
-            let targetOffsetX = (viewportCenter.x - sourceCenter.x - blackPoint.x * scale) * easedProgress
-            let targetOffsetY = (viewportCenter.y - sourceCenter.y - blackPoint.y * scale) * easedProgress
-            let backdropOpacity = smoothStep((progress - 0.42) / 0.34)
-            let fadeIcon = smoothStep((progress - 0.84) / 0.16)
-
-            ZStack {
-                Color.black
-                    .ignoresSafeArea()
-                    .opacity(backdropOpacity)
-
-                ConstructingAppIconView(progress: 1)
-                    .frame(width: iconSize, height: iconSize)
-                    .scaleEffect(scale)
-                    .position(sourceCenter)
-                    .offset(x: targetOffsetX, y: targetOffsetY)
-                    .opacity(1 - fadeIcon)
-                    .blur(radius: fadeIcon * 4)
-            }
-            .frame(width: geo.size.width, height: geo.size.height)
-            .allowsHitTesting(true)
-        }
-        .ignoresSafeArea()
-    }
-
-    private var easedProgress: CGFloat {
-        let clamped = max(0, min(progress, 1))
-        return clamped * clamped * (3 - 2 * clamped)
-    }
-
-    private func smoothStep(_ value: CGFloat) -> CGFloat {
-        let clamped = max(0, min(value, 1))
-        return clamped * clamped * (3 - 2 * clamped)
     }
 }
 
@@ -702,14 +601,6 @@ struct AuthGateView: View {
         ConstructingAppIconView(progress: 1)
             .frame(width: 60, height: 60)
             .matchedGeometryEffect(id: "auth-app-icon", in: iconNamespace)
-            .background {
-                GeometryReader { proxy in
-                    Color.clear.preference(
-                        key: AuthIconFramePreferenceKey.self,
-                        value: proxy.frame(in: .named("authOverlaySpace"))
-                    )
-                }
-            }
             .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.45 : 0.18), radius: 14, y: 8)
     }
 
