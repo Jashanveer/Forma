@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BA6DAFB2F8F3C8E009AA3BC"
-               BuildableName = "habit-tracker-macos.app"
-               BlueprintName = "habit-tracker-macos"
-               ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+               BuildableName = "Forma.app"
+               BlueprintName = "Forma"
+               ReferencedContainer = "container:Forma.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BA6DB0A2F8F3C90009AA3BC"
-               BuildableName = "habit-tracker-macosTests.xctest"
-               BlueprintName = "habit-tracker-macosTests"
-               ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+               BuildableName = "FormaTests.xctest"
+               BlueprintName = "FormaTests"
+               ReferencedContainer = "container:Forma.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BA6DB142F8F3C90009AA3BC"
-               BuildableName = "habit-tracker-macosUITests.xctest"
-               BlueprintName = "habit-tracker-macosUITests"
-               ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+               BuildableName = "FormaUITests.xctest"
+               BlueprintName = "FormaUITests"
+               ReferencedContainer = "container:Forma.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BA6DAFB2F8F3C8E009AA3BC"
-            BuildableName = "habit-tracker-macos.app"
-            BlueprintName = "habit-tracker-macos"
-            ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+            BuildableName = "Forma.app"
+            BlueprintName = "Forma"
+            ReferencedContainer = "container:Forma.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -87,9 +87,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BA6DAFB2F8F3C8E009AA3BC"
-            BuildableName = "habit-tracker-macos.app"
-            BlueprintName = "habit-tracker-macos"
-            ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+            BuildableName = "Forma.app"
+            BlueprintName = "Forma"
+            ReferencedContainer = "container:Forma.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

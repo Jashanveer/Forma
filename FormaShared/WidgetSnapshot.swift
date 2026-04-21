@@ -94,7 +94,7 @@ struct WidgetSnapshot: Codable {
     let last28DaysDone: [Bool]
     let backend: BackendData?
 
-    static let appGroupID = "group.jashanveer.habit-tracker-macos"
+    static let appGroupID = "group.jashanveer.Forma"
     static let fileName = "widget-snapshot.json"
 
     static var containerURL: URL? {

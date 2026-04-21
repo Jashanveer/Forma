@@ -3,7 +3,7 @@ import SwiftData
 import UserNotifications
 
 @main
-struct HabitTrackerMacosApp: App {
+struct FormaApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var sharedModelContainer: ModelContainer = {

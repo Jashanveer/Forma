@@ -2,21 +2,21 @@
 
 ## Project Structure & Module Organization
 
-This repository contains a SwiftUI macOS app generated as an Xcode project. App source lives in `habit-tracker-macos/habit-tracker-macos/`, including `habit_tracker_macosApp.swift`, `ContentView.swift`, `Item.swift`, and `Assets.xcassets`. Unit tests live in `habit-tracker-macos/habit-tracker-macosTests/` and use Swift Testing. UI tests live in `habit-tracker-macos/habit-tracker-macosUITests/` and use XCTest/XCUIAutomation. Keep feature code close to the app target unless it becomes shared enough to justify a separate module.
+This repository contains a SwiftUI macOS app generated as an Xcode project. App source lives in `Forma/Forma/`, including `FormaApp.swift`, `ContentView.swift`, `Habit.swift`, and `Assets.xcassets`. Unit tests live in `Forma/FormaTests/` and use Swift Testing. UI tests live in `Forma/FormaUITests/` and use XCTest/XCUIAutomation. Keep feature code close to the app target unless it becomes shared enough to justify a separate module.
 
 ## Build, Test, and Development Commands
 
 Use Xcode for the primary development loop:
 
 ```sh
-open habit-tracker-macos.xcodeproj
+open Forma.xcodeproj
 ```
 
 From the command line, build and test with Xcode's build system:
 
 ```sh
-xcodebuild -project habit-tracker-macos.xcodeproj -scheme habit-tracker-macos build
-xcodebuild -project habit-tracker-macos.xcodeproj -scheme habit-tracker-macos test
+xcodebuild -project Forma.xcodeproj -scheme Forma build
+xcodebuild -project Forma.xcodeproj -scheme Forma test
 ```
 
 The build command compiles the app target. The test command runs the active test targets configured for the scheme. Prefer Xcode's Product > Run for local manual testing of the macOS app.
@@ -27,7 +27,7 @@ Use SwiftUI and SwiftData patterns already present in the project. Indent with 4
 
 ## Testing Guidelines
 
-Add unit tests in `habit_tracker_macosTests.swift` or nearby test files using Swift Testing's `@Test` and `#expect(...)`. Add end-to-end UI checks in the UI test target using `XCUIApplication`. Name tests after observable behavior, for example `@Test func addingHabitStoresTimestamp()`. Cover persistence and view-model logic with unit tests, and reserve UI tests for user workflows such as launch, add, edit, and delete.
+Add unit tests in `FormaTests.swift` or nearby test files using Swift Testing's `@Test` and `#expect(...)`. Add end-to-end UI checks in the UI test target using `XCUIApplication`. Name tests after observable behavior, for example `@Test func addingHabitStoresTimestamp()`. Cover persistence and view-model logic with unit tests, and reserve UI tests for user workflows such as launch, add, edit, and delete.
 
 ## Commit & Pull Request Guidelines
 

@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 enum KeychainSessionStore {
-    private static let service = "jashanveer.habit-tracker-macos.session"
+    private static let service = "jashanveer.Forma.session"
     private static let account = "primary"
 
     static func save(_ session: BackendSession) {

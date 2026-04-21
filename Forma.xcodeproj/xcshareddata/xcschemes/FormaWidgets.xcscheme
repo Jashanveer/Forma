@@ -17,9 +17,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F154B69396161217305A3106"
-               BuildableName = "HabitTrackerWidgets.appex"
-               BlueprintName = "HabitTrackerWidgets"
-               ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+               BuildableName = "FormaWidgets.appex"
+               BlueprintName = "FormaWidgets"
+               ReferencedContainer = "container:Forma.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,9 +31,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BA6DAFB2F8F3C8E009AA3BC"
-               BuildableName = "habit-tracker-macos.app"
-               BlueprintName = "habit-tracker-macos"
-               ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+               BuildableName = "Forma.app"
+               BlueprintName = "Forma"
+               ReferencedContainer = "container:Forma.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -65,18 +65,18 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F154B69396161217305A3106"
-            BuildableName = "HabitTrackerWidgets.appex"
-            BlueprintName = "HabitTrackerWidgets"
-            ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+            BuildableName = "FormaWidgets.appex"
+            BlueprintName = "FormaWidgets"
+            ReferencedContainer = "container:Forma.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BA6DAFB2F8F3C8E009AA3BC"
-            BuildableName = "habit-tracker-macos.app"
-            BlueprintName = "habit-tracker-macos"
-            ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+            BuildableName = "Forma.app"
+            BlueprintName = "Forma"
+            ReferencedContainer = "container:Forma.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -110,9 +110,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BA6DAFB2F8F3C8E009AA3BC"
-            BuildableName = "habit-tracker-macos.app"
-            BlueprintName = "habit-tracker-macos"
-            ReferencedContainer = "container:habit-tracker-macos.xcodeproj">
+            BuildableName = "Forma.app"
+            BlueprintName = "Forma"
+            ReferencedContainer = "container:Forma.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -6,7 +6,7 @@
     <true/>
     <key>com.apple.security.application-groups</key>
     <array>
-        <string>group.jashanveer.habit-tracker-macos</string>
+        <string>group.jashanveer.Forma</string>
     </array>
 </dict>
 </plist>

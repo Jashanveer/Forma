@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		217074364E5B7A8F26799235 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA2258DC3FD83B9BA649C1D7 /* WidgetKit.framework */; };
-		944AB57390090127A4CAF17E /* HabitTrackerWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1DA33907F824AA520B8E3E6 /* HabitTrackerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		944AB57390090127A4CAF17E /* FormaWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1DA33907F824AA520B8E3E6 /* FormaWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FA112B4AA34979A6793FF969 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA2258DC3FD83B9BA649C1D7 /* WidgetKit.framework */; };
 		FC69D715931379676998B8A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAFAFB09EE3A870B45A5981A /* Cocoa.framework */; };
 /* End PBXBuildFile section */
@@ -19,21 +19,21 @@
 			containerPortal = 9BA6DAF42F8F3C8E009AA3BC /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F154B69396161217305A3106;
-			remoteInfo = HabitTrackerWidgets;
+			remoteInfo = FormaWidgets;
 		};
 		9BA6DB0C2F8F3C90009AA3BC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9BA6DAF42F8F3C8E009AA3BC /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9BA6DAFB2F8F3C8E009AA3BC;
-			remoteInfo = "habit-tracker-macos";
+			remoteInfo = Forma;
 		};
 		9BA6DB162F8F3C90009AA3BC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9BA6DAF42F8F3C8E009AA3BC /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9BA6DAFB2F8F3C8E009AA3BC;
-			remoteInfo = "habit-tracker-macos";
+			remoteInfo = Forma;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -44,7 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				944AB57390090127A4CAF17E /* HabitTrackerWidgets.appex in Embed App Extensions */,
+				944AB57390090127A4CAF17E /* FormaWidgets.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -52,51 +52,51 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9BA6DAFC2F8F3C8E009AA3BC /* habit-tracker-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "habit-tracker-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9BA6DB0B2F8F3C90009AA3BC /* habit-tracker-macosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "habit-tracker-macosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9BA6DB152F8F3C90009AA3BC /* habit-tracker-macosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "habit-tracker-macosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BA6DAFC2F8F3C8E009AA3BC /* Forma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Forma.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BA6DB0B2F8F3C90009AA3BC /* FormaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FormaTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BA6DB152F8F3C90009AA3BC /* FormaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FormaUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA2258DC3FD83B9BA649C1D7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
-		C1DA33907F824AA520B8E3E6 /* HabitTrackerWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitTrackerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1DA33907F824AA520B8E3E6 /* FormaWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FormaWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAFAFB09EE3A870B45A5981A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		13A215B0F827262B522440C4 /* Exceptions for "HabitTrackerWidgets" folder in "HabitTrackerWidgets" target */ = {
+		13A215B0F827262B522440C4 /* Exceptions for "FormaWidgets" folder in "FormaWidgets" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = F154B69396161217305A3106 /* HabitTrackerWidgets */;
+			target = F154B69396161217305A3106 /* FormaWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1EE480870898A6B223A22E79 /* HabitTrackerWidgets */ = {
+		1EE480870898A6B223A22E79 /* FormaWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				13A215B0F827262B522440C4 /* Exceptions for "HabitTrackerWidgets" folder in "HabitTrackerWidgets" target */,
+				13A215B0F827262B522440C4 /* Exceptions for "FormaWidgets" folder in "FormaWidgets" target */,
 			);
-			path = HabitTrackerWidgets;
+			path = FormaWidgets;
 			sourceTree = "<group>";
 		};
-		721684DBC3B6D1921098EDDD /* HabitTrackerShared */ = {
+		721684DBC3B6D1921098EDDD /* FormaShared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HabitTrackerShared;
+			path = FormaShared;
 			sourceTree = "<group>";
 		};
-		9BA6DAFE2F8F3C8E009AA3BC /* habit-tracker-macos */ = {
+		9BA6DAFE2F8F3C8E009AA3BC /* Forma */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "habit-tracker-macos";
+			path = Forma;
 			sourceTree = "<group>";
 		};
-		9BA6DB0E2F8F3C90009AA3BC /* habit-tracker-macosTests */ = {
+		9BA6DB0E2F8F3C90009AA3BC /* FormaTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "habit-tracker-macosTests";
+			path = FormaTests;
 			sourceTree = "<group>";
 		};
-		9BA6DB182F8F3C90009AA3BC /* habit-tracker-macosUITests */ = {
+		9BA6DB182F8F3C90009AA3BC /* FormaUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "habit-tracker-macosUITests";
+			path = FormaUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -156,23 +156,23 @@
 		9BA6DAF32F8F3C8E009AA3BC = {
 			isa = PBXGroup;
 			children = (
-				9BA6DAFE2F8F3C8E009AA3BC /* habit-tracker-macos */,
-				9BA6DB0E2F8F3C90009AA3BC /* habit-tracker-macosTests */,
-				9BA6DB182F8F3C90009AA3BC /* habit-tracker-macosUITests */,
+				9BA6DAFE2F8F3C8E009AA3BC /* Forma */,
+				9BA6DB0E2F8F3C90009AA3BC /* FormaTests */,
+				9BA6DB182F8F3C90009AA3BC /* FormaUITests */,
 				9B8AC25D2F907E3A00CFB6AD /* Frameworks */,
 				9BA6DAFD2F8F3C8E009AA3BC /* Products */,
-				721684DBC3B6D1921098EDDD /* HabitTrackerShared */,
-				1EE480870898A6B223A22E79 /* HabitTrackerWidgets */,
+				721684DBC3B6D1921098EDDD /* FormaShared */,
+				1EE480870898A6B223A22E79 /* FormaWidgets */,
 			);
 			sourceTree = "<group>";
 		};
 		9BA6DAFD2F8F3C8E009AA3BC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9BA6DAFC2F8F3C8E009AA3BC /* habit-tracker-macos.app */,
-				9BA6DB0B2F8F3C90009AA3BC /* habit-tracker-macosTests.xctest */,
-				9BA6DB152F8F3C90009AA3BC /* habit-tracker-macosUITests.xctest */,
-				C1DA33907F824AA520B8E3E6 /* HabitTrackerWidgets.appex */,
+				9BA6DAFC2F8F3C8E009AA3BC /* Forma.app */,
+				9BA6DB0B2F8F3C90009AA3BC /* FormaTests.xctest */,
+				9BA6DB152F8F3C90009AA3BC /* FormaUITests.xctest */,
+				C1DA33907F824AA520B8E3E6 /* FormaWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -180,9 +180,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9BA6DAFB2F8F3C8E009AA3BC /* habit-tracker-macos */ = {
+		9BA6DAFB2F8F3C8E009AA3BC /* Forma */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9BA6DB1F2F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget "habit-tracker-macos" */;
+			buildConfigurationList = 9BA6DB1F2F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget Forma */;
 			buildPhases = (
 				9BA6DAF82F8F3C8E009AA3BC /* Sources */,
 				9BA6DAF92F8F3C8E009AA3BC /* Frameworks */,
@@ -195,17 +195,17 @@
 				597966E2F1E90C04BB45797F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				721684DBC3B6D1921098EDDD /* HabitTrackerShared */,
-				9BA6DAFE2F8F3C8E009AA3BC /* habit-tracker-macos */,
+				721684DBC3B6D1921098EDDD /* FormaShared */,
+				9BA6DAFE2F8F3C8E009AA3BC /* Forma */,
 			);
-			name = "habit-tracker-macos";
-			productName = "habit-tracker-macos";
-			productReference = 9BA6DAFC2F8F3C8E009AA3BC /* habit-tracker-macos.app */;
+			name = Forma;
+			productName = Forma;
+			productReference = 9BA6DAFC2F8F3C8E009AA3BC /* Forma.app */;
 			productType = "com.apple.product-type.application";
 		};
-		9BA6DB0A2F8F3C90009AA3BC /* habit-tracker-macosTests */ = {
+		9BA6DB0A2F8F3C90009AA3BC /* FormaTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9BA6DB222F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget "habit-tracker-macosTests" */;
+			buildConfigurationList = 9BA6DB222F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget FormaTests */;
 			buildPhases = (
 				9BA6DB072F8F3C90009AA3BC /* Sources */,
 				9BA6DB082F8F3C90009AA3BC /* Frameworks */,
@@ -217,16 +217,16 @@
 				9BA6DB0D2F8F3C90009AA3BC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				9BA6DB0E2F8F3C90009AA3BC /* habit-tracker-macosTests */,
+				9BA6DB0E2F8F3C90009AA3BC /* FormaTests */,
 			);
-			name = "habit-tracker-macosTests";
-			productName = "habit-tracker-macosTests";
-			productReference = 9BA6DB0B2F8F3C90009AA3BC /* habit-tracker-macosTests.xctest */;
+			name = FormaTests;
+			productName = FormaTests;
+			productReference = 9BA6DB0B2F8F3C90009AA3BC /* FormaTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		9BA6DB142F8F3C90009AA3BC /* habit-tracker-macosUITests */ = {
+		9BA6DB142F8F3C90009AA3BC /* FormaUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9BA6DB252F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget "habit-tracker-macosUITests" */;
+			buildConfigurationList = 9BA6DB252F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget FormaUITests */;
 			buildPhases = (
 				9BA6DB112F8F3C90009AA3BC /* Sources */,
 				9BA6DB122F8F3C90009AA3BC /* Frameworks */,
@@ -238,16 +238,16 @@
 				9BA6DB172F8F3C90009AA3BC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				9BA6DB182F8F3C90009AA3BC /* habit-tracker-macosUITests */,
+				9BA6DB182F8F3C90009AA3BC /* FormaUITests */,
 			);
-			name = "habit-tracker-macosUITests";
-			productName = "habit-tracker-macosUITests";
-			productReference = 9BA6DB152F8F3C90009AA3BC /* habit-tracker-macosUITests.xctest */;
+			name = FormaUITests;
+			productName = FormaUITests;
+			productReference = 9BA6DB152F8F3C90009AA3BC /* FormaUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		F154B69396161217305A3106 /* HabitTrackerWidgets */ = {
+		F154B69396161217305A3106 /* FormaWidgets */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 18851B6067F49ACEBA70084E /* Build configuration list for PBXNativeTarget "HabitTrackerWidgets" */;
+			buildConfigurationList = 18851B6067F49ACEBA70084E /* Build configuration list for PBXNativeTarget "FormaWidgets" */;
 			buildPhases = (
 				26D09A9C09358DD90DAF59C3 /* Sources */,
 				C1A6C0994AFCEECD30349E4C /* Frameworks */,
@@ -258,12 +258,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				1EE480870898A6B223A22E79 /* HabitTrackerWidgets */,
-				721684DBC3B6D1921098EDDD /* HabitTrackerShared */,
+				1EE480870898A6B223A22E79 /* FormaWidgets */,
+				721684DBC3B6D1921098EDDD /* FormaShared */,
 			);
-			name = HabitTrackerWidgets;
-			productName = HabitTrackerWidgets;
-			productReference = C1DA33907F824AA520B8E3E6 /* HabitTrackerWidgets.appex */;
+			name = FormaWidgets;
+			productName = FormaWidgets;
+			productReference = C1DA33907F824AA520B8E3E6 /* FormaWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -294,7 +294,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9BA6DAF72F8F3C8E009AA3BC /* Build configuration list for PBXProject "habit-tracker-macos" */;
+			buildConfigurationList = 9BA6DAF72F8F3C8E009AA3BC /* Build configuration list for PBXProject Forma */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -308,10 +308,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9BA6DAFB2F8F3C8E009AA3BC /* habit-tracker-macos */,
-				9BA6DB0A2F8F3C90009AA3BC /* habit-tracker-macosTests */,
-				9BA6DB142F8F3C90009AA3BC /* habit-tracker-macosUITests */,
-				F154B69396161217305A3106 /* HabitTrackerWidgets */,
+				9BA6DAFB2F8F3C8E009AA3BC /* Forma */,
+				9BA6DB0A2F8F3C90009AA3BC /* FormaTests */,
+				9BA6DB142F8F3C90009AA3BC /* FormaUITests */,
+				F154B69396161217305A3106 /* FormaWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -381,18 +381,18 @@
 /* Begin PBXTargetDependency section */
 		597966E2F1E90C04BB45797F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = HabitTrackerWidgets;
-			target = F154B69396161217305A3106 /* HabitTrackerWidgets */;
+			name = FormaWidgets;
+			target = F154B69396161217305A3106 /* FormaWidgets */;
 			targetProxy = 272604538D17D46C28F58E71 /* PBXContainerItemProxy */;
 		};
 		9BA6DB0D2F8F3C90009AA3BC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 9BA6DAFB2F8F3C8E009AA3BC /* habit-tracker-macos */;
+			target = 9BA6DAFB2F8F3C8E009AA3BC /* Forma */;
 			targetProxy = 9BA6DB0C2F8F3C90009AA3BC /* PBXContainerItemProxy */;
 		};
 		9BA6DB172F8F3C90009AA3BC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 9BA6DAFB2F8F3C8E009AA3BC /* habit-tracker-macos */;
+			target = 9BA6DAFB2F8F3C8E009AA3BC /* Forma */;
 			targetProxy = 9BA6DB162F8F3C90009AA3BC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -403,13 +403,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = HabitTrackerWidgets/HabitTrackerWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FormaWidgets/FormaWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = YLN8JUVVX3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = HabitTrackerWidgets/Info.plist;
+				INFOPLIST_FILE = FormaWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Forma Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -418,7 +418,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macos.HabitTrackerWidgets";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.Forma.FormaWidgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -549,7 +549,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "habit-tracker-macos/habit-tracker-macos.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Forma/Forma.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YLN8JUVVX3;
@@ -576,7 +576,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macos";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.Forma";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -597,7 +597,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "habit-tracker-macos/habit-tracker-macos.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Forma/Forma.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YLN8JUVVX3;
@@ -624,7 +624,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macos";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.Forma";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -651,7 +651,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macosTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.FormaTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -661,7 +661,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/habit-tracker-macos.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/habit-tracker-macos";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Forma.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Forma";
 				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Debug;
@@ -677,7 +677,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macosTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.FormaTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -687,7 +687,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/habit-tracker-macos.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/habit-tracker-macos";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Forma.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Forma";
 				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Release;
@@ -702,7 +702,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macosUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.FormaUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -712,7 +712,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = "habit-tracker-macos";
+				TEST_TARGET_NAME = Forma;
 				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Debug;
@@ -727,7 +727,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macosUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.FormaUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -737,7 +737,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = "habit-tracker-macos";
+				TEST_TARGET_NAME = Forma;
 				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Release;
@@ -747,13 +747,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = HabitTrackerWidgets/HabitTrackerWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FormaWidgets/FormaWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = YLN8JUVVX3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = HabitTrackerWidgets/Info.plist;
+				INFOPLIST_FILE = FormaWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Forma Widgets";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -762,7 +762,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.habit-tracker-macos.HabitTrackerWidgets";
+				PRODUCT_BUNDLE_IDENTIFIER = "jashanveer.Forma.FormaWidgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -775,7 +775,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		18851B6067F49ACEBA70084E /* Build configuration list for PBXNativeTarget "HabitTrackerWidgets" */ = {
+		18851B6067F49ACEBA70084E /* Build configuration list for PBXNativeTarget "FormaWidgets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DE280EAEA2CA13928DBC3B4D /* Release */,
@@ -784,7 +784,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BA6DAF72F8F3C8E009AA3BC /* Build configuration list for PBXProject "habit-tracker-macos" */ = {
+		9BA6DAF72F8F3C8E009AA3BC /* Build configuration list for PBXProject Forma */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BA6DB1D2F8F3C90009AA3BC /* Debug */,
@@ -793,7 +793,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BA6DB1F2F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget "habit-tracker-macos" */ = {
+		9BA6DB1F2F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget Forma */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BA6DB202F8F3C90009AA3BC /* Debug */,
@@ -802,7 +802,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BA6DB222F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget "habit-tracker-macosTests" */ = {
+		9BA6DB222F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget FormaTests */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BA6DB232F8F3C90009AA3BC /* Debug */,
@@ -811,7 +811,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9BA6DB252F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget "habit-tracker-macosUITests" */ = {
+		9BA6DB252F8F3C90009AA3BC /* Build configuration list for PBXNativeTarget FormaUITests */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9BA6DB262F8F3C90009AA3BC /* Debug */,

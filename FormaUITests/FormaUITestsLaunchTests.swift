@@ -1,13 +1,13 @@
 //
-//  habit_tracker_macosUITestsLaunchTests.swift
-//  habit-tracker-macosUITests
+//  FormaUITestsLaunchTests.swift
+//  FormaUITests
 //
 //  Created by Jashanveer Singh on 4/14/26.
 //
 
 import XCTest
 
-final class habit_tracker_macosUITestsLaunchTests: XCTestCase {
+final class FormaUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

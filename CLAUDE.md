@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```sh
 # Build
-xcodebuild -project habit-tracker-macos.xcodeproj -scheme habit-tracker-macos build
+xcodebuild -project Forma.xcodeproj -scheme Forma build
 
 # Run all tests
-xcodebuild -project habit-tracker-macos.xcodeproj -scheme habit-tracker-macos test
+xcodebuild -project Forma.xcodeproj -scheme Forma test
 
 # Open in Xcode
-open habit-tracker-macos.xcodeproj
+open Forma.xcodeproj
 ```
 
 When running inside Xcode, prefer `BuildProject` and `RunAllTests`/`RunSomeTests` MCP tools. Use `XcodeRefreshCodeIssuesInFile` for fast compile-error checking without a full build.
@@ -22,7 +22,7 @@ When running inside Xcode, prefer `BuildProject` and `RunAllTests`/`RunSomeTests
 **macOS-only SwiftUI + SwiftData app** — a single-window habit tracker.
 
 - **Data model** (`Habit.swift`): Single `@Model` class `Habit` with `title`, `createdAt`, and `completedDayKeys: [String]`. Day keys use `"yyyy-MM-dd"` format. No relationships or migrations yet.
-- **App entry** (`habit_tracker_macosApp.swift`): Sets up `ModelContainer` with persistent storage and a single `WindowGroup`.
+- **App entry** (`FormaApp.swift`): Sets up `ModelContainer` with persistent storage and a single `WindowGroup`.
 - **UI** (`ContentView.swift`): ~1300-line monolithic file containing all views, styles, and logic:
   - `ContentView` — root view with `@Query` for habits, gradient background, center panel, slide-out stats sidebar, and calendar sheet
   - `HabitMetrics` — pure struct with static methods for streak calculation, perfect days, and medal/achievement logic

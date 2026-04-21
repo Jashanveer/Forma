@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 @main
-struct HabitTrackerWidgetsBundle: WidgetBundle {
+struct FormaWidgetsBundle: WidgetBundle {
     var body: some Widget {
         TodayRingWidget()
         StreakWidget()

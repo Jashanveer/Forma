@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import habit_tracker_macos
+@testable import Forma
 
 // MARK: - Existing HabitMetrics tests
 
