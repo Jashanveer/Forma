@@ -7,7 +7,7 @@ struct FormaApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([Habit.self])
+        let schema = Schema([Habit.self, HabitCompletion.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         // First try a normal open; SwiftData handles lightweight migrations automatically.

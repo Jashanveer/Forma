@@ -39,6 +39,33 @@ enum HabitEntryType: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// How confidently a habit's completion can be verified against a trusted data source.
+/// Drives point multipliers on the leaderboard so self-reported checks can't out-earn
+/// checks backed by HealthKit or Screen Time evidence.
+enum VerificationTier: String, Codable {
+    /// HealthKit / DeviceActivity confirms the activity happened.
+    case auto
+    /// Some evidence available (hydration log, food diary) but not strictly provable.
+    case partial
+    /// Honor-system only — no automatic verification possible.
+    case selfReport
+}
+
+/// Identifies which external signal to consult when verifying a completion.
+/// `verificationParam` on the Habit holds the threshold/activity-type for the query
+/// (steps count, sleep hours, workout activity type, etc.).
+enum VerificationSource: String, Codable {
+    case healthKitWorkout          // HKWorkout of a specific activity type
+    case healthKitSteps            // HKQuantityTypeIdentifier.stepCount threshold
+    case healthKitMindful          // HKCategoryTypeIdentifier.mindfulSession
+    case healthKitSleep            // HKCategoryTypeIdentifier.sleepAnalysis
+    case healthKitBodyMass         // HKQuantityTypeIdentifier.bodyMass entry today
+    case healthKitHydration        // dietaryWater
+    case healthKitNoAlcohol        // numberOfAlcoholicBeverages == 0
+    case screenTimeSocial          // DeviceActivity social category cap (iOS only)
+    case selfReport                // No automatic verification possible
+}
+
 @Model
 final class Habit {
     var title: String
@@ -78,6 +105,33 @@ final class Habit {
     /// across sync cycles.
     var overduePenaltyApplied: Bool = false
 
+    // MARK: - Verification (HealthKit / Screen Time)
+    // New additive fields — all default, so existing SwiftData stores migrate
+    // silently without a migration plan.
+
+    /// Raw `VerificationTier`; defaults to `.selfReport` so legacy habits keep
+    /// working unchanged and only earn base points until a canonical mapping
+    /// is attached.
+    var verificationTierRaw: String = VerificationTier.selfReport.rawValue
+
+    /// Raw `VerificationSource`; nil means "no external signal — honor system".
+    var verificationSourceRaw: String? = nil
+
+    /// Threshold or type code for the verification query.
+    /// Semantics depend on `verificationSource`:
+    ///   - `.healthKitWorkout`: `HKWorkoutActivityType.rawValue` (nil matches any workout)
+    ///   - `.healthKitSteps`: step threshold (e.g. 8000)
+    ///   - `.healthKitMindful`: minimum minutes (e.g. 5)
+    ///   - `.healthKitSleep`: minimum hours (e.g. 7)
+    ///   - `.healthKitHydration`: minimum millilitres (e.g. 2000)
+    ///   - `.screenTimeSocial`: maximum minutes allowed on social category
+    var verificationParam: Double? = nil
+
+    /// Stable id of the `CanonicalHabit` this habit maps to (e.g. `"run"`,
+    /// `"workout"`). Nil means the user typed a custom title that didn't
+    /// match any canonical alias.
+    var canonicalKey: String? = nil
+
     /// Backward-compatible entry kind accessor.
     /// Older stores may contain missing/invalid values; those fall back to `.habit`.
     var entryType: HabitEntryType {
@@ -87,6 +141,20 @@ final class Habit {
         set {
             entryTypeRawValue = newValue.rawValue
         }
+    }
+
+    /// Typed accessor for `verificationTierRaw`. Unknown raw values fall back
+    /// to `.selfReport` so a forward-compatible client never crashes on a
+    /// tier introduced later.
+    var verificationTier: VerificationTier {
+        get { VerificationTier(rawValue: verificationTierRaw) ?? .selfReport }
+        set { verificationTierRaw = newValue.rawValue }
+    }
+
+    /// Typed accessor for `verificationSourceRaw`.
+    var verificationSource: VerificationSource? {
+        get { verificationSourceRaw.flatMap(VerificationSource.init(rawValue:)) }
+        set { verificationSourceRaw = newValue?.rawValue }
     }
 
     init(
@@ -102,7 +170,11 @@ final class Habit {
         reminderWindow: String? = nil,
         dueAt: Date? = nil,
         isArchived: Bool = false,
-        overduePenaltyApplied: Bool = false
+        overduePenaltyApplied: Bool = false,
+        verificationTier: VerificationTier = .selfReport,
+        verificationSource: VerificationSource? = nil,
+        verificationParam: Double? = nil,
+        canonicalKey: String? = nil
     ) {
         self.title = title
         self.entryTypeRawValue = entryType.rawValue
@@ -117,6 +189,10 @@ final class Habit {
         self.dueAt = dueAt
         self.isArchived = isArchived
         self.overduePenaltyApplied = overduePenaltyApplied
+        self.verificationTierRaw = verificationTier.rawValue
+        self.verificationSourceRaw = verificationSource?.rawValue
+        self.verificationParam = verificationParam
+        self.canonicalKey = canonicalKey
     }
 
     // MARK: - Convenience

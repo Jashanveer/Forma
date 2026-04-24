@@ -561,6 +561,8 @@
 				INFOPLIST_KEY_BackendBaseURL = "http://127.0.0.1:8080";
 				INFOPLIST_KEY_CFBundleDisplayName = Forma;
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Forma uses Apple Health data to verify your habits and award accurate leaderboard points.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Forma can log workouts and mindfulness minutes back to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -609,6 +611,8 @@
 				INFOPLIST_KEY_BackendBaseURL = "http://127.0.0.1:8080";
 				INFOPLIST_KEY_CFBundleDisplayName = Forma;
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Forma uses Apple Health data to verify your habits and award accurate leaderboard points.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Forma can log workouts and mindfulness minutes back to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
