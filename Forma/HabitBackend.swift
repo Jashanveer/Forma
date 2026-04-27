@@ -378,6 +378,14 @@ final class HabitBackendStore: ObservableObject {
     // Legacy UserDefaults keys — read once at launch and migrated to the Keychain.
     private static let legacySessionKey = "habitTracker.localhost.session.v1"
     private static let legacyTokenKey   = "habitTracker.localhost.token"
+
+    /// Per-user UserDefaults key for the in-progress profile-setup flag.
+    /// Persisting this is what lets a user who quits the app mid-setup
+    /// land back on the username/avatar screen on relaunch instead of
+    /// the dashboard with the auto-generated placeholder handle.
+    private static func profileSetupPendingKey(for userId: String) -> String {
+        "forma.requiresProfileSetup.\(userId)"
+    }
     private let apiClient: BackendAPIClient
     private let authRepository: AuthRepository
     private let habitRepository: HabitRepository
@@ -502,6 +510,15 @@ final class HabitBackendStore: ObservableObject {
             startUserStream()
         }
 
+        // Restore the "in-progress profile setup" overlay if the user
+        // quit during the username/avatar pick on a previous launch.
+        // Has to run after all stored properties are initialised because
+        // `currentUserId` reads `self.token`.
+        if let uid = currentUserId,
+           UserDefaults.standard.bool(forKey: Self.profileSetupPendingKey(for: uid)) {
+            requiresProfileSetup = true
+        }
+
         isOnline = networkMonitor.isOnline
         networkCancellable = networkMonitor.$isOnline
             .receive(on: DispatchQueue.main)
@@ -607,8 +624,14 @@ final class HabitBackendStore: ObservableObject {
             if session.isNewUser {
                 // Brand-new Apple account — show the profile-setup screen
                 // first so the user picks a public username + avatar
-                // before landing on the dashboard.
+                // before landing on the dashboard. Persist the flag so
+                // that quitting the app mid-setup re-shows the screen on
+                // the next cold launch instead of stranding the user on
+                // the dashboard with the auto-generated placeholder.
                 requiresProfileSetup = true
+                if let uid = currentUserId {
+                    UserDefaults.standard.set(true, forKey: Self.profileSetupPendingKey(for: uid))
+                }
                 justRegistered = true
                 // Stash whatever Apple returned in `fullName` (only
                 // populated on the very first authorization) so the
@@ -651,6 +674,9 @@ final class HabitBackendStore: ObservableObject {
                 displayName: displayName
             )
             requiresProfileSetup = false
+            if let uid = currentUserId {
+                UserDefaults.standard.removeObject(forKey: Self.profileSetupPendingKey(for: uid))
+            }
             pendingAppleFullName = nil
             errorMessage = nil
             authRequestState = .success(())
@@ -1601,6 +1627,11 @@ final class HabitBackendStore: ObservableObject {
     }
 
     private func clearSession(errorMessage: String? = nil) {
+        // Capture the outgoing user id before nil'ing the token so we can
+        // clear their persisted profile-setup flag — otherwise a stale
+        // entry would survive a sign-out and re-trigger the overlay if
+        // someone signed back in to the same account.
+        let outgoingUserId = currentUserId
         stopStream()
         stopUserStream()
         token = nil; dashboard = nil; liveMessagesByMatch = [:]
@@ -1616,6 +1647,9 @@ final class HabitBackendStore: ObservableObject {
         KeychainSessionStore.delete()
         UserDefaults.standard.removeObject(forKey: Self.legacySessionKey)
         UserDefaults.standard.removeObject(forKey: Self.legacyTokenKey)
+        if let uid = outgoingUserId {
+            UserDefaults.standard.removeObject(forKey: Self.profileSetupPendingKey(for: uid))
+        }
         authRequestState = .idle; habitListRequestState = .idle; dashboardRequestState = .idle
         createHabitRequestState = .idle; updateHabitRequestState = .idle; checkUpdateRequestState = .idle
         deleteHabitRequestState = .idle; mentorRequestState = .idle
