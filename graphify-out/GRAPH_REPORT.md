@@ -1,209 +1,343 @@
-# Graph Report - .  (2026-04-18)
+# Graph Report - /Users/jashanveer/Documents/Forma  (2026-04-27)
 
 ## Corpus Check
-- Corpus is ~27,259 words - fits in a single context window. You may not need a graph.
+- 60 files · ~180,956 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 543 nodes · 1046 edges · 27 communities detected
-- Extraction: 82% EXTRACTED · 18% INFERRED · 0% AMBIGUOUS · INFERRED: 191 edges (avg confidence: 0.8)
+- 711 nodes · 1210 edges · 46 communities detected
+- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 175 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Auth & Calendar UI|Auth & Calendar UI]]
-- [[_COMMUNITY_Accountability Social Network|Accountability Social Network]]
-- [[_COMMUNITY_Auth Sessions & Calendar Modes|Auth Sessions & Calendar Modes]]
-- [[_COMMUNITY_Center Panel & AI Greeting|Center Panel & AI Greeting]]
-- [[_COMMUNITY_Backend Auth API Client|Backend Auth API Client]]
-- [[_COMMUNITY_Habit Backend Store & Cache|Habit Backend Store & Cache]]
-- [[_COMMUNITY_UI Styles & Calendar Grid|UI Styles & Calendar Grid]]
-- [[_COMMUNITY_Habit Data Model & Sync|Habit Data Model & Sync]]
-- [[_COMMUNITY_JSON Coding Keys|JSON Coding Keys]]
-- [[_COMMUNITY_Project Docs & Context|Project Docs & Context]]
-- [[_COMMUNITY_Response Cache Layer|Response Cache Layer]]
-- [[_COMMUNITY_App Entry & Notifications|App Entry & Notifications]]
-- [[_COMMUNITY_UI Test Suite|UI Test Suite]]
-- [[_COMMUNITY_Auth Gate Views|Auth Gate Views]]
-- [[_COMMUNITY_Retry Policy & Tests|Retry Policy & Tests]]
-- [[_COMMUNITY_Looping Video Player|Looping Video Player]]
-- [[_COMMUNITY_Time Reminder Manager|Time Reminder Manager]]
-- [[_COMMUNITY_Walker Character State|Walker Character State]]
-- [[_COMMUNITY_Speech Bubble Nudge|Speech Bubble Nudge]]
-- [[_COMMUNITY_Onboarding Flow|Onboarding Flow]]
-- [[_COMMUNITY_Edge Panel Handle|Edge Panel Handle]]
-- [[_COMMUNITY_Test Naming Guidelines|Test Naming Guidelines]]
-- [[_COMMUNITY_Build Commands|Build Commands]]
-- [[_COMMUNITY_Coding Style Rules|Coding Style Rules]]
-- [[_COMMUNITY_Floating Check Pill|Floating Check Pill]]
-- [[_COMMUNITY_Commit & PR Rules|Commit & PR Rules]]
-- [[_COMMUNITY_Agent Instructions|Agent Instructions]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
+- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `HabitBackendStore` - 41 edges
-2. `CodingKeys` - 26 edges
-3. `task` - 22 edges
-4. `BackendHabit` - 19 edges
-5. `Habit` - 16 edges
-6. `HabitMetrics` - 15 edges
-7. `BackendAPIClient` - 15 edges
-8. `ContentView` - 13 edges
+1. `HabitBackendStore` - 60 edges
+2. `CodingKeys` - 48 edges
+3. `BackendHabit` - 21 edges
+4. `BackendAPIClient` - 21 edges
+5. `Habit (SwiftData @Model)` - 19 edges
+6. `CodingKeys` - 18 edges
+7. `Forma iOS Design Brief` - 17 edges
+8. `AccountabilityRepository` - 13 edges
 9. `ResponseCache` - 12 edges
 10. `HabitRepository` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Project Structure & Module Organization` --semantically_similar_to--> `Architecture Overview`  [INFERRED] [semantically similar]
-  AGENTS.md → CLAUDE.md
-- `Swift Testing Framework Usage` --semantically_similar_to--> `Testing Guidelines`  [INFERRED] [semantically similar]
-  CLAUDE.md → AGENTS.md
-- `Code Style Guidelines` --semantically_similar_to--> `Coding Style & Naming Conventions`  [INFERRED] [semantically similar]
-  CLAUDE.md → AGENTS.md
-- `Build & Test Commands` --semantically_similar_to--> `Build, Test, and Development Commands`  [EXTRACTED] [semantically similar]
-  CLAUDE.md → AGENTS.md
-- `HabitBackendStore Request States` --conceptually_related_to--> `Habit.swift Data Model`  [INFERRED]
-  AGENTS.md → CLAUDE.md
+- `SyncEngine` --conceptually_related_to--> `Integration Test Agent realtime-auth-validator`  [INFERRED]
+  Forma/SyncEngine.swift → AGENTS.md
+- `Liquid Glass Surfaces` --aligns_with--> `Native Apple Squircle Icon Design`  [INFERRED]
+  FORMA_iOS_DESIGN_BRIEF.md → Forma/Assets.xcassets/AppIcon.appiconset/icon_1024.png
+- `Forma iOS Design Brief` --semantically_similar_to--> `CLAUDE.md (Project Guide)`  [INFERRED] [semantically similar]
+  FORMA_iOS_DESIGN_BRIEF.md → CLAUDE.md
+- `Liquid Glass Surfaces` --semantically_similar_to--> `Key Patterns (Liquid Glass + Streaks)`  [INFERRED] [semantically similar]
+  FORMA_iOS_DESIGN_BRIEF.md → CLAUDE.md
+- `Spring Motion Only` --semantically_similar_to--> `Design Philosophy (Native-Feel)`  [INFERRED] [semantically similar]
+  FORMA_iOS_DESIGN_BRIEF.md → CLAUDE.md
 
 ## Hyperedges (group relationships)
-- **ContentView Monolithic File - Views, Styles, Logic** — claude_contentview, claude_habitmetrics, claude_datekey, claude_medal_dayinfo, claude_centerpanel, claude_habitcard, claude_statssidebar, claude_calendarsheet, claude_yearperfectcalendar, claude_liquidglass, claude_button_styles [EXTRACTED 1.00]
-- **realtime-auth-validator Validation Workflow** — agents_realtime_auth_validator, agents_jwt_refresh, agents_sse_realtime, agents_habitbackendstore, agents_backend_local [EXTRACTED 1.00]
-- **Native Mac Design Principles** — claude_design_philosophy, claude_spring_animations, claude_liquidglass, claude_foundationmodels [EXTRACTED 1.00]
+- **Native-Feel Design Principles** — forma_ios_design_brief_liquid_glass, forma_ios_design_brief_spring_motion, forma_ios_design_brief_system_respectful, forma_ios_design_brief_rationale_native_feel, claude_md_design_philosophy [INFERRED 0.85]
+- **Verification Tier System (auto/partial/self)** — claude_md_verification_tiers, claude_md_verification_sources, claude_md_canonical_key, verificationservice_verificationservice, canonicalhabits_canonicalhabits, habitcompletion_habitcompletion, habit_habit [EXTRACTED 1.00]
+- **Toggle to Verify to Leaderboard Flow** — contentview_contentview, habitbackend_habitbackendstore, verificationservice_verificationservice, habitcompletion_habitcompletion, claude_md_phase2_backend, claude_md_leaderboard_followups [EXTRACTED 1.00]
 
 ## Communities
 
-### Community 0 - "Auth & Calendar UI"
+### Community 0 - "Community 0"
 Cohesion: 0.04
-Nodes (58): AuthModeButton, AvatarChoice, AvatarChoiceButton, ConnectionStatusPill, FloatingHabitBackground, HabitChipView, HabitItem, CalendarModeToggle (+50 more)
+Nodes (38): AccountabilityRepository, ApiErrorResponse, AppleLoginRequest, AuthRepository, BackendAPIClient, BackendEnvironment, BackendSession, CheckUpdateRequest (+30 more)
 
-### Community 1 - "Accountability Social Network"
-Cohesion: 0.08
-Nodes (14): AccountabilityRepository, CheckUpdateRequest, HabitRepository, HabitWriteRequest, MentorshipMessageRequest, StreakFreezeRequest, TaskWriteRequest, ContentView (+6 more)
+### Community 1 - "Community 1"
+Cohesion: 0.04
+Nodes (53): ChatMessageRow, ChecklistRow, ChecklistView, ChecklistWidget, BadgeStat, CCChecklistRow, ChallengeCard, CommandCenterView (+45 more)
 
-### Community 2 - "Auth Sessions & Calendar Modes"
-Cohesion: 0.07
-Nodes (42): BackendAuthTokens, BackendSession, CalendarDisplayMode, activity, perfectDays, CaseIterable, Codable, ConfettiOverlay (+34 more)
-
-### Community 3 - "Center Panel & AI Greeting"
-Cohesion: 0.08
-Nodes (16): JWTTokenInspector, CenterPanel, HabitMetricsTests, DateKey, DayInfo, HabitMetrics, Medal, SmartGreeting (+8 more)
-
-### Community 4 - "Backend Auth API Client"
-Cohesion: 0.07
-Nodes (25): ApiErrorResponse, AuthRepository, BackendAPIClient, BackendEnvironment, DeviceRepository, DeviceTokenRequest, EmailVerificationRequest, EmptyResponse (+17 more)
-
-### Community 5 - "Habit Backend Store & Cache"
-Cohesion: 0.18
+### Community 2 - "Community 2"
+Cohesion: 0.11
 Nodes (1): HabitBackendStore
 
-### Community 6 - "UI Styles & Calendar Grid"
+### Community 3 - "Community 3"
+Cohesion: 0.04
+Nodes (54): Build, Test, and Development Commands, Coding Style & Naming Conventions, AGENTS.md Repository Guidelines, JWT Refresh Pipeline, Validation Pass Criteria, Project Structure & Module Organization, Integration Test Agent realtime-auth-validator, HabitBackendStore Request States (+46 more)
+
+### Community 4 - "Community 4"
+Cohesion: 0.04
+Nodes (45): CodingKeys, aiMentor, badges, canonicalKey, checksByDate, checksToday, createdAt, currentUser (+37 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.08
-Nodes (16): ButtonStyle, MonthDots, CleanShotSurfaceLevel, base, control, elevated, CleanShotSurfaceModifier, EdgeHandleButtonStyle (+8 more)
+Nodes (21): AppIntent, UserPreferences, Codable, Equatable, SnapshotEntry, SnapshotTimelineProvider, TimelineEntry, TimelineProvider (+13 more)
 
-### Community 7 - "Habit Data Model & Sync"
-Cohesion: 0.1
-Nodes (7): Habit, HabitModelTests, SSEParsingTests, SyncEngineOutboxTests, SyncEngineReconcileTests, ReconcileResult, SyncEngine
+### Community 6 - "Community 6"
+Cohesion: 0.08
+Nodes (8): HabitMigrationTests, VerificationServiceFallbackTests, WeeklyTargetTests, HabitMetricsTests, HabitModelTests, SyncEngineOutboxTests, SyncEngineReconcileTests, Habit (SwiftData @Model)
 
-### Community 8 - "JSON Coding Keys"
+### Community 7 - "Community 7"
+Cohesion: 0.08
+Nodes (12): CaseIterable, FormaUITests, FormaUITestsLaunchTests, OverduePenaltyStore, HabitReminderWindow, afternoon, evening, morning (+4 more)
+
+### Community 8 - "Community 8"
 Cohesion: 0.07
-Nodes (30): CodingKeys, accessToken, accessTokenExpiresAtEpochSeconds, refreshToken, token, CodingKey, CodingKeys, badges (+22 more)
+Nodes (26): CodingKeys, accessToken, accessTokenExpiresAtEpochSeconds, isNewUser, refreshToken, token, JWTTokenInspector, CodingKey (+18 more)
 
-### Community 9 - "Project Docs & Context"
-Cohesion: 0.08
-Nodes (28): Backend Running at http://127.0.0.1:8080, HabitBackendStore Request States, JWT Refresh Pipeline, Project Structure & Module Organization, Integration Test Agent: realtime-auth-validator, SSE Real-Time Chat Events, Architecture Overview, Custom Button Styles (+20 more)
+### Community 9 - "Community 9"
+Cohesion: 0.13
+Nodes (23): BackendAuthTokens, Decodable, AccountabilityDashboard, EmptyResponse, FriendSummary, HabitTimeCluster, LeaderboardEntry, Level (+15 more)
 
-### Community 10 - "Response Cache Layer"
-Cohesion: 0.38
-Nodes (3): Entry, ResponseCache, ResponseCacheTests
+### Community 10 - "Community 10"
+Cohesion: 0.09
+Nodes (16): ButtonStyle, CleanShotSurfaceLevel, base, control, elevated, CleanShotSurfaceModifier, EdgeHandleButtonStyle, MinimalToggleStyle (+8 more)
 
-### Community 11 - "App Entry & Notifications"
+### Community 11 - "Community 11"
+Cohesion: 0.15
+Nodes (7): Entry, HabitRepository, HabitWriteRequest, ResponseCache, TaskWriteRequest, ResponseCacheTests, BackendHabit
+
+### Community 12 - "Community 12"
+Cohesion: 0.16
+Nodes (6): RetryPolicy, CheckStroke, Color, FormaIconView, RetryPolicyTests, Shape
+
+### Community 13 - "Community 13"
 Cohesion: 0.18
-Nodes (7): App, AppDelegate, HabitTrackerMacosApp, Notification.Name, NSApplicationDelegate, NSObject, UNUserNotificationCenterDelegate
+Nodes (3): AutoVerificationCoordinator, HabitCompletion, KeychainSessionStore
 
-### Community 12 - "UI Test Suite"
-Cohesion: 0.18
-Nodes (3): habit_tracker_macosUITests, habit_tracker_macosUITestsLaunchTests, XCTestCase
+### Community 14 - "Community 14"
+Cohesion: 0.11
+Nodes (17): canonicalKey Field, Tier-weighted Leaderboard (auto×10/partial×5/self×1), Perfect-Day Math (frequency rest budget), Backend Round-Trip Phase 2, Rationale: additive defaults so SwiftData lightweight-migrates, Rationale: never auto-applied silently, Rationale: distinguish auto-confirmed from honor-system, Rationale: frequency habits hide once weekly target met (+9 more)
 
-### Community 13 - "Auth Gate Views"
+### Community 15 - "Community 15"
+Cohesion: 0.13
+Nodes (10): AppleProfileSetupView, AvailabilityState, available, checking, invalid, taken, untouched, Field (+2 more)
+
+### Community 16 - "Community 16"
+Cohesion: 0.23
+Nodes (3): MenteeCharacterView, MentorCharacterView, Ranked
+
+### Community 17 - "Community 17"
 Cohesion: 0.24
-Nodes (4): AuthGateView, AuthMode, signIn, signUp
+Nodes (3): NetworkMonitor, ObservableObject, WalkerState
 
-### Community 14 - "Retry Policy & Tests"
-Cohesion: 0.54
-Nodes (2): RetryPolicy, RetryPolicyTests
+### Community 18 - "Community 18"
+Cohesion: 0.25
+Nodes (3): Layout, FlowLayout, VerificationHelpSheet
 
-### Community 15 - "Looping Video Player"
-Cohesion: 0.33
-Nodes (3): Coordinator, LoopingVideoView, NSViewRepresentable
+### Community 19 - "Community 19"
+Cohesion: 0.31
+Nodes (2): CanonicalHabitsTests, match
 
-### Community 16 - "Time Reminder Manager"
-Cohesion: 0.43
-Nodes (3): ObservableObject, ReminderPlan, TimeReminderManager
+### Community 20 - "Community 20"
+Cohesion: 0.38
+Nodes (1): FormaTransition
 
-### Community 17 - "Walker Character State"
-Cohesion: 0.52
-Nodes (1): WalkerState
+### Community 21 - "Community 21"
+Cohesion: 0.67
+Nodes (2): FormaWidgetsBundle, WidgetBundle
 
-### Community 18 - "Speech Bubble Nudge"
-Cohesion: 0.4
-Nodes (3): Shape, SpeechBubbleNudge, Triangle
+### Community 22 - "Community 22"
+Cohesion: 1.0
+Nodes (2): AuthViews, Auth Screen
 
-### Community 19 - "Onboarding Flow"
-Cohesion: 0.5
+### Community 23 - "Community 23"
+Cohesion: 1.0
+Nodes (2): FloatingCheckPill, Floating Elements
+
+### Community 24 - "Community 24"
+Cohesion: 1.0
+Nodes (1): ConfettiOverlay
+
+### Community 25 - "Community 25"
+Cohesion: 1.0
+Nodes (1): SettingsPanel
+
+### Community 26 - "Community 26"
+Cohesion: 1.0
+Nodes (1): SpeechBubbleNudge
+
+### Community 27 - "Community 27"
+Cohesion: 1.0
+Nodes (1): StatsSidebar
+
+### Community 28 - "Community 28"
+Cohesion: 1.0
+Nodes (1): CanonicalHabits
+
+### Community 29 - "Community 29"
+Cohesion: 1.0
+Nodes (1): LoopingVideoView
+
+### Community 30 - "Community 30"
+Cohesion: 1.0
+Nodes (1): CenterPanel
+
+### Community 31 - "Community 31"
+Cohesion: 1.0
+Nodes (1): HabitMetrics
+
+### Community 32 - "Community 32"
+Cohesion: 1.0
+Nodes (1): HabitCard
+
+### Community 33 - "Community 33"
+Cohesion: 1.0
+Nodes (1): CleanShotTheme
+
+### Community 34 - "Community 34"
+Cohesion: 1.0
 Nodes (1): OnboardingView
 
-### Community 20 - "Edge Panel Handle"
-Cohesion: 0.4
-Nodes (4): DragDirection, horizontal, vertical, EdgePanelHandle
-
-### Community 21 - "Test Naming Guidelines"
-Cohesion: 0.67
-Nodes (3): Rationale: Test Names After Observable Behavior, Testing Guidelines, Swift Testing Framework Usage
-
-### Community 22 - "Build Commands"
+### Community 35 - "Community 35"
 Cohesion: 1.0
-Nodes (2): Build, Test, and Development Commands, Build & Test Commands
+Nodes (1): ContentView
 
-### Community 23 - "Coding Style Rules"
+### Community 36 - "Community 36"
 Cohesion: 1.0
-Nodes (2): Coding Style & Naming Conventions, Code Style Guidelines
+Nodes (1): VerificationService
 
-### Community 24 - "Floating Check Pill"
+### Community 37 - "Community 37"
 Cohesion: 1.0
-Nodes (0): 
+Nodes (1): FormaIntroView
 
-### Community 25 - "Commit & PR Rules"
+### Community 38 - "Community 38"
 Cohesion: 1.0
-Nodes (1): Commit & Pull Request Guidelines
+Nodes (1): CalendarSheet
 
-### Community 26 - "Agent Instructions"
+### Community 39 - "Community 39"
 Cohesion: 1.0
-Nodes (1): Agent-Specific Instructions
+Nodes (1): YearPerfectCalendar
+
+### Community 40 - "Community 40"
+Cohesion: 1.0
+Nodes (1): Intro / Cold-Launch Screen
+
+### Community 41 - "Community 41"
+Cohesion: 1.0
+Nodes (1): Onboarding Flow
+
+### Community 42 - "Community 42"
+Cohesion: 1.0
+Nodes (1): Stats / Progress Screen
+
+### Community 43 - "Community 43"
+Cohesion: 1.0
+Nodes (1): Social / Settings Screen
+
+### Community 44 - "Community 44"
+Cohesion: 1.0
+Nodes (1): Calendar Screen
+
+### Community 45 - "Community 45"
+Cohesion: 1.0
+Nodes (1): Habit Card Design
 
 ## Knowledge Gaps
-- **82 isolated node(s):** `Notification.Name`, `id`, `title`, `reminderWindow`, `checksByDate` (+77 more)
+- **149 isolated node(s):** `ConfettiOverlay`, `TopFriendSnapshot`, `id`, `title`, `reminderWindow` (+144 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Build Commands`** (2 nodes): `Build, Test, and Development Commands`, `Build & Test Commands`
+- **Thin community `Community 22`** (2 nodes): `AuthViews`, `Auth Screen`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Coding Style Rules`** (2 nodes): `Coding Style & Naming Conventions`, `Code Style Guidelines`
+- **Thin community `Community 23`** (2 nodes): `FloatingCheckPill`, `Floating Elements`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Floating Check Pill`** (1 nodes): `FloatingCheckPill.swift`
+- **Thin community `Community 24`** (1 nodes): `ConfettiOverlay`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Commit & PR Rules`** (1 nodes): `Commit & Pull Request Guidelines`
+- **Thin community `Community 25`** (1 nodes): `SettingsPanel`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Agent Instructions`** (1 nodes): `Agent-Specific Instructions`
+- **Thin community `Community 26`** (1 nodes): `SpeechBubbleNudge`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 27`** (1 nodes): `StatsSidebar`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 28`** (1 nodes): `CanonicalHabits`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 29`** (1 nodes): `LoopingVideoView`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 30`** (1 nodes): `CenterPanel`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 31`** (1 nodes): `HabitMetrics`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 32`** (1 nodes): `HabitCard`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 33`** (1 nodes): `CleanShotTheme`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 34`** (1 nodes): `OnboardingView`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 35`** (1 nodes): `ContentView`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 36`** (1 nodes): `VerificationService`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 37`** (1 nodes): `FormaIntroView`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 38`** (1 nodes): `CalendarSheet`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 39`** (1 nodes): `YearPerfectCalendar`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 40`** (1 nodes): `Intro / Cold-Launch Screen`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 41`** (1 nodes): `Onboarding Flow`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 42`** (1 nodes): `Stats / Progress Screen`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 43`** (1 nodes): `Social / Settings Screen`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 44`** (1 nodes): `Calendar Screen`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 45`** (1 nodes): `Habit Card Design`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ContentView` connect `Accountability Social Network` to `Auth & Calendar UI`?**
-  _High betweenness centrality (0.142) - this node is a cross-community bridge._
-- **Why does `CodingKeys` connect `JSON Coding Keys` to `Auth Sessions & Calendar Modes`, `Center Panel & AI Greeting`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
-- **Why does `MonthDots` connect `UI Styles & Calendar Grid` to `Auth & Calendar UI`?**
-  _High betweenness centrality (0.076) - this node is a cross-community bridge._
-- **Are the 21 inferred relationships involving `task` (e.g. with `.submitMessage()` and `.signOut()`) actually correct?**
-  _`task` has 21 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Notification.Name`, `id`, `title` to the rest of the system?**
-  _82 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Auth & Calendar UI` be split into smaller, more focused modules?**
+- **Why does `HabitBackendStore` connect `Community 2` to `Community 0`, `Community 8`, `Community 9`, `Community 13`, `Community 17`?**
+  _High betweenness centrality (0.141) - this node is a cross-community bridge._
+- **Why does `CodingKeys` connect `Community 4` to `Community 8`, `Community 9`, `Community 19`?**
+  _High betweenness centrality (0.133) - this node is a cross-community bridge._
+- **Are the 16 inferred relationships involving `BackendHabit` (e.g. with `.listHabits()` and `.listTasks()`) actually correct?**
+  _`BackendHabit` has 16 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `ConfettiOverlay`, `TopFriendSnapshot`, `id` to the rest of the system?**
+  _149 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.04 - nodes in this community are weakly interconnected._
-- **Should `Accountability Social Network` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
