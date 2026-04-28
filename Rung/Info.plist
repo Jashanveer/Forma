@@ -4,9 +4,6 @@
 <dict>
 	<key>BackendBaseURL</key>
 	<string>https://rung-backend-dev.fly.dev</string>
-	<!-- Permits HTTP loads to localhost / *.local / private LAN IPs so the
-	     `-BackendBaseURL http://localhost:8080` launch-arg toggle works
-	     even on signed/sandboxed builds. App Review-clean. -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
